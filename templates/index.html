@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  :root {
+    --header-h: 0px;
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffff;
+  }
+
+  .g-0 {
+    gap: 0 !important;
+  }
+
+  .hero-outer {
+    min-height: 80vh;
+    /* reduced height, removes scrollbar */
+  }
+
+  .left-col {
+    position: relative;
+    background-image: url('{{ url_for("static", filename="images/salad.jpg") }}');
+    background-repeat: no-repeat;
+    background-position: center left;
+    background-size: 95% auto;
+    min-height: 82vh;
+    /* reduced */
+    width: 100%;
+  }
+
+  .right-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    /* reduced */
+    padding: 48px;
+    background: #ffff;
+  }
+
+
+  /* subtle white overlay */
+  .left-col::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.15);
+    /* semi-transparent white */
+  }
+
+  .hero-card {
+    max-width: 540px;
+  }
+
+  .hero-card h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+  }
+
+  .hero-card p.lead {
+    color: #555;
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 768px) {
+
+    .left-col,
+    .right-col {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+</style>
+
+
+<div class="container-fluid g-0 hero-outer">
+  <div class="row g-0">
+
+    <!-- LEFT: full-height image (no gap, covers whole left side) -->
+    <div class="col-12 col-md-6 left-col"></div>
+
+    <!-- RIGHT: content -->
+    <div class="col-12 col-md-6 right-col">
+      <div class="hero-card">
+        <h1 class="mb-3">Welcome to <span class="text-success">Helio</span></h1>
+        <h5 class="text-muted mb-4">Smart Diet Planner</h5>
+        <p class="lead mb-4">
+          Your journey to health on a plate — personalised meal recommendations based on your profile.
+        </p>
+
+        {% if not current_user.is_authenticated %}
+        <div class="d-flex gap-3">
+          <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">Login</a>
+          <a href="{{ url_for('register') }}" class="btn btn-outline-success btn-lg">Register</a>
+        </div>
+        {% else %}
+        <div class="d-flex gap-3">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Dashboard</a>
+          <a href="{{ url_for('profile') }}" class="btn btn-outline-success btn-lg">My Profile</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

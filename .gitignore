@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Environment variables / secrets
+.env
+MongoPass.txt
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Large model checkpoints (optional: keep only if <100MB)
+# If you want to track models, remove these lines
+*.h5
+*.keras
+*.pkl

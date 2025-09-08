@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .g-0 {
+    gap: 0 !important;
+  }
+
+  .register-outer {
+    min-height: 80vh;
+  }
+
+  /* Left: Tagline section */
+  .left-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    min-height: 80vh;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .left-col h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #198754;
+    line-height: 1.3;
+  }
+
+  .left-col p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 15px;
+  }
+
+  /* Right: Register card */
+  .right-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    padding: 40px;
+    min-height: 80vh;
+  }
+
+  .register-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  .register-card h2 {
+    font-weight: 700;
+    color: #198754;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .register-card .form-control {
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .register-card .btn {
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 768px) {
+
+    .left-col,
+    .right-col {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+</style>
+
+<div class="container-fluid g-0 register-outer">
+  <div class="row g-0">
+    <!-- LEFT: Tagline -->
+    <div class="col-12 col-md-6 left-col">
+      <div>
+        <h1>Start Fresh,<br> Build Healthy Habits</h1>
+        <p>Join Helio today and take the first step toward a smarter, healthier lifestyle.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Register Card -->
+    <div class="col-12 col-md-6 right-col">
+      <div class="register-card">
+        <h2>Register</h2>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg">Register</button>
+          </div>
+        </form>
+        <p class="text-center mt-3 mb-0">
+          Already have an account?
+          <a href="{{ url_for('login') }}" class="text-success fw-bold">Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
