@@ -1,0 +1,77 @@
+
+ Profile 1
+
+* Age: 25
+* Gender: Male (0)
+* Height: 175 cm
+* Weight: 70 kg
+* BMI: 22.9
+* Chronic Disease: No (0)
+* BP: 120 / 80
+* Cholesterol: 180
+* Blood Sugar: 90
+* Sleep Hours: 7
+
+**Prediction → Balanced Diet**
+
+
+Profile 2
+
+* Age: 32
+* Gender: Female (1)
+* Height: 162 cm
+* Weight: 58 kg
+* BMI: 22.1
+* Chronic Disease: No (0)
+* BP: 100 / 60
+* Cholesterol: 220
+* Blood Sugar: 120
+* Sleep Hours: 6
+
+**Prediction → Mediterranean Diet**
+
+Profile 3
+
+* Age: 40
+* Gender: Male (0)
+* Height: 180 cm
+* Weight: 95 kg
+* BMI: 29.3 (Overweight)
+* Chronic Disease: Yes (1)
+* BP: 140 / 90
+* Cholesterol: 250
+* Blood Sugar: 140
+* Sleep Hours: 5
+
+**Prediction → Low Fat Diet**
+
+Profile 4
+
+* Age: 28
+* Gender: Female (1)
+* Height: 160 cm
+* Weight: 54 kg
+* BMI: 21.1
+* Chronic Disease: No (0)
+* BP: 120 / 80
+* Cholesterol: 180
+* Blood Sugar: 90
+* Sleep Hours: 8
+
+**Prediction → High Protein Diet**
+
+Profile 5
+
+* Age: 35
+* Gender: Male (0)
+* Height: 170 cm
+* Weight: 65 kg
+* BMI: 22.5
+* Chronic Disease: No (0)
+* BP: 120 / 80
+* Cholesterol: 180
+* Blood Sugar: 90
+* Sleep Hours: 9
+
+**Prediction → Low Carb Diet**
+

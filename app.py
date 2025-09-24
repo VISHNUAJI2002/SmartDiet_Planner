@@ -17,7 +17,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
 
 mongo = PyMongo(app)
 
-# ✅ Load trained model + preprocessing
+# Load trained model + preprocessing
 model = tf.keras.models.load_model("model/diet_model.keras")
 scaler = joblib.load("model/scaler.pkl")
 meal_encoder = joblib.load("model/meal_encoder.pkl")
@@ -38,9 +38,11 @@ def load_user(user_id):
         return User(user_data)
     return None
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -56,6 +58,7 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html")
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -69,19 +72,22 @@ def login():
         flash("Invalid username or password", "danger")
     return render_template("login.html")
 
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    # Inside app.py dashboard route
-    user_likes = mongo.db.likes.find({"user_id": current_user.id})
+    # Convert cursor to list
+    user_likes = list(mongo.db.likes.find({"user_id": current_user.id}))
 
-    pipeline = [
-        {"$group": {"_id": "$diet_name", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
-    ]
-    global_likes = list(mongo.db.likes.aggregate(pipeline))
+    # Fetch profile info
+    profile = mongo.db.profiles.find_one({"user_id": current_user.id})
 
-    return render_template("dashboard.html", username=current_user.username, user_likes=user_likes, global_likes=global_likes)
+    return render_template(
+        "dashboard.html",
+        username=current_user.username,
+        user_likes=user_likes,
+        profile=profile
+    )
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -118,13 +124,18 @@ def profile():
             "sleep_hours": request.form.get("sleep_hours"),
         }
 
-        mongo.db.profiles.update_one({"user_id": current_user.id}, {"$set": data}, upsert=True)
+        # 🔑 Overwrites if exists, inserts if not
+        mongo.db.profiles.update_one(
+            {"user_id": current_user.id}, {"$set": data}, upsert=True
+        )
+
         flash("Profile updated successfully!", "success")
         return redirect(url_for("profile"))
 
+    # Fetch profile (may not exist for new users)
     profile = mongo.db.profiles.find_one({"user_id": current_user.id})
-    return render_template("profile.html", profile=profile)
 
+    return render_template("profile.html", profile=profile)
 
 
 @app.route("/predict")
@@ -282,7 +293,6 @@ def predict():
     )
 
 
-
 @app.route("/like/<diet_name>/<int:plan_index>")
 @login_required
 def like_diet(diet_name, plan_index):
@@ -292,19 +302,24 @@ def like_diet(diet_name, plan_index):
         "plan_index": plan_index
     })
 
-    if not existing_like:
+    if existing_like:
+        # Unlike (remove document)
+        mongo.db.likes.delete_one({
+            "user_id": current_user.id,
+            "diet_name": diet_name,
+            "plan_index": plan_index
+        })
+        flash(f"You unliked {diet_name} - Diet {plan_index}", "info")
+    else:
+        # Like (insert document)
         mongo.db.likes.insert_one({
             "user_id": current_user.id,
             "diet_name": diet_name,
             "plan_index": plan_index
         })
+        flash(f"You liked {diet_name} - Diet {plan_index}", "success")
 
-    flash(f"You liked {diet_name} - Diet {plan_index}", "success")
     return redirect(url_for("predict"))
-
-
-
-
 
 
 @app.route("/logout")

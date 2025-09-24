@@ -83,7 +83,6 @@ class_names = [str(c) for c in meal_encoder.classes_]
 print("Classification Report:\n", classification_report(y_test, y_pred, target_names=class_names))
 
 # 10. Save model
-
 # Ensure model folder exists
 os.makedirs("model", exist_ok=True)
 

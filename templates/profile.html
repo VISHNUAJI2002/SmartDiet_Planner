@@ -4,27 +4,27 @@
 <div class="container mt-5">
     <!-- Main profile card -->
     <div class="card shadow-sm p-4" style="max-width: 1100px; margin-left: 40px; border-radius: 12px; border: none;">
-        <!-- <h2 class="mb-4 text-primary text-start">User Profile</h2> -->
 
-        {% if profile %}
+        {% if profile and profile.age %}
         <!-- Saved Profile Data -->
         <div class="row">
-            <!-- Profile Data Section -->
             <div class="col-md-12">
                 <div class="card p-4" style="border: none; border-radius: 12px;">
                     <h3 class="mb-3 text-success text-start">Your Profile</h3>
                     <hr>
                     <div class="row">
                         <div class="col-md-6 mb-3"><strong>Age:</strong> {{ profile.age }}</div>
-                        <div class="col-md-6 mb-3"><strong>Gender:</strong> {% if profile.gender == "0" %}Male{% else
-                            %}Female{% endif %}</div>
+                        <div class="col-md-6 mb-3"><strong>Gender:</strong>
+                            {% if profile.gender == "0" %}Male{% else %}Female{% endif %}
+                        </div>
 
                         <div class="col-md-6 mb-3"><strong>Height (cm):</strong> {{ profile.height_cm }}</div>
                         <div class="col-md-6 mb-3"><strong>Weight (kg):</strong> {{ profile.weight_kg }}</div>
 
                         <div class="col-md-6 mb-3"><strong>BMI:</strong> {{ profile.bmi }}</div>
-                        <div class="col-md-6 mb-3"><strong>Chronic Disease:</strong> {% if profile.chronic_disease ==
-                            "1" %}Yes{% else %}No{% endif %}</div>
+                        <div class="col-md-6 mb-3"><strong>Chronic Disease:</strong>
+                            {% if profile.chronic_disease == "1" %}Yes{% else %}No{% endif %}
+                        </div>
 
                         <div class="col-md-6 mb-3"><strong>BP Systolic:</strong> {{ profile.blood_pressure_systolic }}
                         </div>
@@ -47,125 +47,210 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
                 Update Profile
             </button>
+
+            {% if profile.age and profile.gender and profile.height_cm and profile.weight_kg %}
             <a href="{{ url_for('predict') }}" class="btn btn-success">🍴 Predict Meal Plan</a>
+            {% endif %}
         </div>
 
+        {% else %}
+        <!-- New User: Show form directly -->
+        <h3 class="mb-3 text-primary text-start">Complete Your Profile</h3>
+        <p class="text-muted">Please enter your details to get personalized diet recommendations.</p>
+
+        <form method="POST" class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Age</label>
+                <input type="number" name="age" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-select" required>
+                    <option value="0">Male</option>
+                    <option value="1">Female</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Height (cm)</label>
+                <input type="number" name="height_cm" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Weight (kg)</label>
+                <input type="number" name="weight_kg" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">BMI</label>
+                <input type="number" step="0.1" name="bmi" class="form-control" readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Chronic Disease</label>
+                <select name="chronic_disease" class="form-select">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">BP Systolic</label>
+                <select name="blood_pressure_systolic" class="form-select">
+                    <option value="120">Normal</option>
+                    <option value="140">High</option>
+                    <option value="100">Low</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">BP Diastolic</label>
+                <select name="blood_pressure_diastolic" class="form-select">
+                    <option value="80">Normal</option>
+                    <option value="90">High</option>
+                    <option value="60">Low</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Cholesterol</label>
+                <select name="cholesterol_level" class="form-select">
+                    <option value="180">Normal</option>
+                    <option value="220">Borderline</option>
+                    <option value="250">High</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Blood Sugar</label>
+                <select name="blood_sugar_level" class="form-select">
+                    <option value="90">Normal</option>
+                    <option value="120">Prediabetic</option>
+                    <option value="140">Diabetic</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Sleep Hours</label>
+                <select name="sleep_hours" class="form-select">
+                    <option value="5">Poor</option>
+                    <option value="7">Good</option>
+                    <option value="9">Excessive</option>
+                </select>
+            </div>
+
+            <div class="col-12 d-grid">
+                <button type="submit" class="btn btn-success btn-lg">Save Profile</button>
+            </div>
+        </form>
         {% endif %}
     </div>
 </div>
 
-<!-- Update Profile Modal -->
+<!-- Update Profile Modal for existing users -->
 <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content p-4" style="border: none;">
             <div class="modal-header border-0">
-                <h5 class="modal-title text-primary text-start" id="updateProfileLabel">Save Profile</h5>
+                <h5 class="modal-title text-primary text-start" id="updateProfileLabel">Update Profile</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Update form -->
                 <form method="POST" class="row g-3">
 
                     <div class="col-md-6">
                         <label class="form-label">Age</label>
-                        <input type="number" name="age" class="form-control" value="{{ profile.age if profile }}"
-                            required>
+                        <input type="number" name="age" class="form-control" value="{{ profile.age }}" required>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Gender</label>
                         <select name="gender" class="form-select" required>
-                            <option value="0" {% if profile and profile.gender=="0" %}selected{% endif %}>Male</option>
-                            <option value="1" {% if profile and profile.gender=="1" %}selected{% endif %}>Female
-                            </option>
+                            <option value="0" {% if profile.gender=="0" %}selected{% endif %}>Male</option>
+                            <option value="1" {% if profile.gender=="1" %}selected{% endif %}>Female</option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Height (cm)</label>
-                        <input type="number" name="height_cm" class="form-control"
-                            value="{{ profile.height_cm if profile }}">
+                        <input type="number" name="height_cm" class="form-control" value="{{ profile.height_cm }}">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Weight (kg)</label>
-                        <input type="number" name="weight_kg" class="form-control"
-                            value="{{ profile.weight_kg if profile }}">
+                        <input type="number" name="weight_kg" class="form-control" value="{{ profile.weight_kg }}">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">BMI</label>
-                        <input type="number" step="0.1" name="bmi" class="form-control"
-                            value="{{ profile.bmi if profile }}" readonly>
+                        <input type="number" step="0.1" name="bmi" class="form-control" value="{{ profile.bmi }}"
+                            readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Chronic Disease</label>
                         <select name="chronic_disease" class="form-select">
-                            <option value="0" {% if profile and profile.chronic_disease=="0" %}selected{% endif %}>No
-                            </option>
-                            <option value="1" {% if profile and profile.chronic_disease=="1" %}selected{% endif %}>Yes
-                            </option>
+                            <option value="0" {% if profile.chronic_disease=="0" %}selected{% endif %}>No</option>
+                            <option value="1" {% if profile.chronic_disease=="1" %}selected{% endif %}>Yes</option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">BP Systolic</label>
                         <select name="blood_pressure_systolic" class="form-select">
-                            <option value="120" {% if profile and profile.blood_pressure_systolic=="120" %}selected{%
-                                endif %}>Normal</option>
-                            <option value="140" {% if profile and profile.blood_pressure_systolic=="140" %}selected{%
-                                endif %}>High</option>
-                            <option value="100" {% if profile and profile.blood_pressure_systolic=="100" %}selected{%
-                                endif %}>Low</option>
+                            <option value="120" {% if profile.blood_pressure_systolic=="120" %}selected{% endif %}>
+                                Normal</option>
+                            <option value="140" {% if profile.blood_pressure_systolic=="140" %}selected{% endif %}>High
+                            </option>
+                            <option value="100" {% if profile.blood_pressure_systolic=="100" %}selected{% endif %}>Low
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">BP Diastolic</label>
                         <select name="blood_pressure_diastolic" class="form-select">
-                            <option value="80" {% if profile and profile.blood_pressure_diastolic=="80" %}selected{%
-                                endif %}>Normal</option>
-                            <option value="90" {% if profile and profile.blood_pressure_diastolic=="90" %}selected{%
-                                endif %}>High</option>
-                            <option value="60" {% if profile and profile.blood_pressure_diastolic=="60" %}selected{%
-                                endif %}>Low</option>
+                            <option value="80" {% if profile.blood_pressure_diastolic=="80" %}selected{% endif %}>Normal
+                            </option>
+                            <option value="90" {% if profile.blood_pressure_diastolic=="90" %}selected{% endif %}>High
+                            </option>
+                            <option value="60" {% if profile.blood_pressure_diastolic=="60" %}selected{% endif %}>Low
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Cholesterol</label>
                         <select name="cholesterol_level" class="form-select">
-                            <option value="180" {% if profile and profile.cholesterol_level=="180" %}selected{% endif
-                                %}>Normal</option>
-                            <option value="220" {% if profile and profile.cholesterol_level=="220" %}selected{% endif
-                                %}>Borderline</option>
-                            <option value="250" {% if profile and profile.cholesterol_level=="250" %}selected{% endif
-                                %}>High</option>
+                            <option value="180" {% if profile.cholesterol_level=="180" %}selected{% endif %}>Normal
+                            </option>
+                            <option value="220" {% if profile.cholesterol_level=="220" %}selected{% endif %}>Borderline
+                            </option>
+                            <option value="250" {% if profile.cholesterol_level=="250" %}selected{% endif %}>High
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Blood Sugar</label>
                         <select name="blood_sugar_level" class="form-select">
-                            <option value="90" {% if profile and profile.blood_sugar_level=="90" %}selected{% endif %}>
-                                Normal</option>
-                            <option value="120" {% if profile and profile.blood_sugar_level=="120" %}selected{% endif
-                                %}>Prediabetic</option>
-                            <option value="140" {% if profile and profile.blood_sugar_level=="140" %}selected{% endif
-                                %}>Diabetic</option>
+                            <option value="90" {% if profile.blood_sugar_level=="90" %}selected{% endif %}>Normal
+                            </option>
+                            <option value="120" {% if profile.blood_sugar_level=="120" %}selected{% endif %}>Prediabetic
+                            </option>
+                            <option value="140" {% if profile.blood_sugar_level=="140" %}selected{% endif %}>Diabetic
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Sleep Hours</label>
                         <select name="sleep_hours" class="form-select">
-                            <option value="5" {% if profile and profile.sleep_hours=="5" %}selected{% endif %}>Poor
-                            </option>
-                            <option value="7" {% if profile and profile.sleep_hours=="7" %}selected{% endif %}>Good
-                            </option>
-                            <option value="9" {% if profile and profile.sleep_hours=="9" %}selected{% endif %}>Excessive
-                            </option>
+                            <option value="5" {% if profile.sleep_hours=="5" %}selected{% endif %}>Poor</option>
+                            <option value="7" {% if profile.sleep_hours=="7" %}selected{% endif %}>Good</option>
+                            <option value="9" {% if profile.sleep_hours=="9" %}selected{% endif %}>Excessive</option>
                         </select>
                     </div>
 
