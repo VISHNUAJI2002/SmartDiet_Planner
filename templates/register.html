@@ -2,89 +2,24 @@
 {% block content %}
 
 <style>
-  .g-0 {
-    gap: 0 !important;
-  }
-
-  .register-outer {
-    min-height: 80vh;
-  }
-
-  /* Left: Tagline section */
-  .left-col {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-    min-height: 80vh;
-    padding: 40px;
-    text-align: center;
-  }
-
-  .left-col h1 {
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #198754;
-    line-height: 1.3;
-  }
-
-  .left-col p {
-    font-size: 1.2rem;
-    color: #555;
-    margin-top: 15px;
-  }
-
-  /* Right: Register card */
-  .right-col {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f9fa;
-    padding: 40px;
-    min-height: 80vh;
-  }
-
-  .register-card {
-    width: 100%;
-    max-width: 420px;
-    padding: 30px;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  }
-
-  .register-card h2 {
-    font-weight: 700;
-    color: #198754;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
-  .register-card .form-control {
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .register-card .btn {
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: 600;
-    font-size: 1.05rem;
-  }
-
+  /* (CSS styles are unchanged) */
+  .g-0 { gap: 0 !important; }
+  .register-outer { min-height: 80vh; }
+  .left-col { display: flex; align-items: center; justify-content: center; background: #f8f9fa; min-height: 80vh; padding: 40px; text-align: center; }
+  .left-col h1 { font-size: 2.8rem; font-weight: 700; color: #198754; line-height: 1.3; }
+  .left-col p { font-size: 1.2rem; color: #555; margin-top: 15px; }
+  .right-col { display: flex; align-items: center; justify-content: center; background: #f8f9fa; padding: 40px; min-height: 80vh; }
+  .register-card { width: 100%; max-width: 420px; padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); }
+  .register-card h2 { font-weight: 700; color: #198754; margin-bottom: 20px; text-align: center; }
+  .register-card .form-control { border-radius: 8px; padding: 12px; }
+  .register-card .btn { border-radius: 8px; padding: 12px; font-weight: 600; font-size: 1.05rem; }
   @media (min-width: 768px) {
-
-    .left-col,
-    .right-col {
-      flex: 0 0 50%;
-      max-width: 50%;
-    }
+    .left-col, .right-col { flex: 0 0 50%; max-width: 50%; }
   }
 </style>
 
 <div class="container-fluid g-0 register-outer">
   <div class="row g-0">
-    <!-- LEFT: Tagline -->
     <div class="col-12 col-md-6 left-col">
       <div>
         <h1>Start Fresh,<br> Build Healthy Habits</h1>
@@ -92,18 +27,28 @@
       </div>
     </div>
 
-    <!-- RIGHT: Register Card -->
     <div class="col-12 col-md-6 right-col">
       <div class="register-card">
         <h2>Register</h2>
-        <form method="POST">
+        <form method="POST" id="registerForm">
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" name="username" required>
+            <input type="text" class="form-control" name="username" required autocomplete="off">
           </div>
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" name="password" required>
+            <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
+          </div>
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+          </div>
+
+          <div id="passwordError" class="text-danger mb-3"></div>
+
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="showPassword">
+            <label class="form-check-label" for="showPassword">Show Password</label>
           </div>
           <div class="d-grid">
             <button type="submit" class="btn btn-success btn-lg">Register</button>
@@ -117,5 +62,37 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Elements for showing/hiding password
+  const showPasswordCheckbox = document.getElementById('showPassword');
+  const passwordField = document.getElementById('password');
+  const confirmPasswordField = document.getElementById('confirm_password');
+
+  showPasswordCheckbox.addEventListener('change', function() {
+    const type = this.checked ? 'text' : 'password';
+    passwordField.setAttribute('type', type);
+    confirmPasswordField.setAttribute('type', type);
+  });
+
+  // Get the form and the error message container
+  const registerForm = document.getElementById('registerForm');
+  const passwordError = document.getElementById('passwordError');
+
+  // Listen for the form's submit event
+  registerForm.addEventListener('submit', function(event) {
+    // Check if the password and confirm password fields do NOT match
+    if (passwordField.value !== confirmPasswordField.value) {
+      // 1. Prevent the form from submitting
+      event.preventDefault();
+      
+      // 2. Display an error message
+      passwordError.textContent = 'Passwords do not match. Please try again.';
+    } else {
+      // If they do match, ensure the error message is cleared
+      passwordError.textContent = '';
+    }
+  });
+</script>
 
 {% endblock %}

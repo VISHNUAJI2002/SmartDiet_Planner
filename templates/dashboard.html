@@ -2,60 +2,358 @@
 {% block content %}
 
 <div class="container mt-4">
-  <!-- Welcome Section -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <h2 class="fw-bold text-success">Dashboard</h2>
-      <p class="text-muted">Welcome, <strong>{{ username }} !</strong></p>
-    </div>
-  </div>
-
-  <div class="row">
-    <!-- User Liked Diets -->
-    <div class="col-md-6 mb-4 h-100">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-success text-white">
-          <h5 class="mb-0"><i class="bi bi-heart-fill me-2"></i>Your Liked Diets</h5>
-        </div>
-        <div class="card-body">
-          {% if user_likes|length > 0 %}
-          <ul class="list-group list-group-flush">
-            {% for like in user_likes %}
-            <li class="list-group-item">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
-              {{ like.diet_name }} - <small class="text-muted">Plan {{ like.plan_index }}</small>
-            </li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          <p class="text-muted">You haven't liked any diets yet.</p>
-          {% endif %}
-        </div>
-      </div>
+    <div class="text-start mb-4">
+        <h2>Welcome, {{ current_user.username }}!</h2>
+        <p class="text-muted">Here's a summary of your health status and actions.</p>
     </div>
 
-    <!-- Profile Overview -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-secondary text-white">
-          <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Your Profile</h5>
+    <div class="row">
+        <!-- MODIFIED: Column for BMI and the new Daily Tip card -->
+        <div class="col-lg-5 mb-4">
+            <!-- BMI GAUGE CARD -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h4 class="card-title text-success mb-3">Your BMI Status</h4>
+                    {% if profile and profile.bmi %}
+                        <div id="bmi_chart_div"></div>
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 p-3">
+                            <div>
+                                <p class="text-muted">Your BMI will appear here once you complete your profile.</p>
+                                <a href="{{ url_for('profile') }}" class="btn btn-primary">Complete Profile</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- NEW: Daily Health Tip Card -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-primary"><i class="bi bi-lightbulb"></i> Tip of the Day</h4>
+                    <p class="card-text fst-italic text-muted" id="daily-tip-text">
+                        Loading your daily tip...
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-          {% if profile %}
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">Age: {{ profile.age }}</li>
-            <li class="list-group-item">Height: {{ profile.height_cm }} cm</li>
-            <li class="list-group-item">Weight: {{ profile.weight_kg }} kg</li>
-            <li class="list-group-item">BMI: {{ profile.bmi }}</li>
-          </ul>
-          {% else %}
-          <p class="text-muted">You haven't completed your profile yet. <a href="{{ url_for('profile') }}">Update
-              Profile</a></p>
-          {% endif %}
+
+        <!-- Column for Diet/Workout Actions -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Quick Actions</h4>
+                    <p class="card-text">Update your details or get a new meal plan or workout recommendation.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('profile') }}" class="btn btn-secondary"><i class="bi bi-person-fill"></i> Update Profile</a>
+                        <button id="predict-btn" class="btn btn-success"><i class="bi bi-magic"></i> Predict Meal Plan</button>
+                        <a href="{{ url_for('workout_planner') }}" class="btn btn-info text-white"><i class="bi bi-activity"></i> Set Up Workout</a>
+                    </div>
+                </div>
+            </div>
+            <div id="prediction-container" class="card shadow-sm" style="display: none;">
+                <div class="card-body">
+                    <div id="loading-spinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div>
+                        <p class="mt-2">Generating your personalized plan...</p>
+                    </div>
+                    <div id="prediction-result"></div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
+<!-- All JavaScript -->
+{% if profile and profile.bmi %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script type="text/javascript">
+    const bmiValue = parseFloat("{{ profile.bmi }}");
+    function getBmiDetails(bmi) {
+        if (bmi < 18.5) return { status: "Underweight", color: "#26a69a" };
+        if (bmi < 24.9) return { status: "Normal", color: "#81d4fa" };
+        if (bmi < 29.9) return { status: "Overweight", color: "#03a9f4" };
+        return { status: "Obesity", color: "#ef5350" };
+    }
+    const bmiDetails = getBmiDetails(bmiValue);
+    var options = {
+        series: [bmiValue], chart: { type: 'radialBar', offsetY: -20, sparkline: { enabled: true } },
+        plotOptions: { radialBar: { startAngle: -120, endAngle: 120, min: 10, max: 45, track: { background: '#e0e0e0', strokeWidth: '97%', margin: 5, }, dataLabels: { name: { show: true, offsetY: 60, fontSize: '22px', color: bmiDetails.color, formatter: (val) => bmiDetails.status }, value: { offsetY: 10, fontSize: '36px', formatter: (val) => val.toFixed(1) } } } },
+        grid: { padding: { top: -10 } }, fill: { colors: [bmiDetails.color] }, labels: ['BMI'],
+    };
+    var chart = new ApexCharts(document.querySelector("#bmi_chart_div"), options);
+    chart.render();
+</script>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const predictBtn = document.getElementById('predict-btn');
+        const predictionContainer = document.getElementById('prediction-container');
+        const predictionResultDiv = document.getElementById('prediction-result');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        // --- DIET PREDICTION HELPER FUNCTIONS (FULLY RESTORED) ---
+        function printDietPlan() {
+            const planContent = document.getElementById('diet-plan-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<html><head><title>Helio Diet Plan</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:2rem}h2{margin-bottom:1rem}.list-group-item{border:none;padding-left:0; background: transparent !important;}.btn-group, .swap-btn{display:none!important;}</style></head><body><h2>Your Personalized Diet Plan</h2>${planContent}</body></html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
+        }
+
+        function getShareableText() {
+            const breakfast = document.getElementById('breakfast-item').innerText;
+            const lunch = document.getElementById('lunch-item').innerText;
+            const dinner = document.getElementById('dinner-item').innerText;
+            return `Check out my diet plan from Helio:\n\nBreakfast: ${breakfast}\nLunch: ${lunch}\nDinner: ${dinner}`;
+        }
+
+        function copyDietPlan(buttonElement) {
+            const text = getShareableText();
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            const originalText = buttonElement.innerHTML;
+            buttonElement.innerHTML = `<i class="bi bi-check-lg"></i> Copied!`;
+            buttonElement.classList.add('disabled');
+            setTimeout(() => {
+                buttonElement.innerHTML = originalText;
+                buttonElement.classList.remove('disabled');
+            }, 2000);
+        }
+
+        function nativeShareDietPlan() {
+            if (navigator.share) {
+                navigator.share({ title: 'My Helio Diet Plan', text: getShareableText() }).catch(console.error);
+            }
+        }
+        
+        function saveDietPlan(buttonElement) {
+            const mealPlanName = document.getElementById('meal-plan-name-hidden').value;
+            const breakfast = document.getElementById('breakfast-item').innerText;
+            const lunch = document.getElementById('lunch-item').innerText;
+            const dinner = document.getElementById('dinner-item').innerText;
+            
+            const payload = {
+                meal_plan_name: mealPlanName,
+                meals: { Breakfast: breakfast, Lunch: lunch, Dinner: dinner }
+            };
+
+            fetch("{{ url_for('save_prediction') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    buttonElement.innerHTML = `<i class="bi bi-bookmark-check-fill"></i> Saved!`;
+                    buttonElement.classList.remove('btn-outline-primary');
+                    buttonElement.classList.add('btn-primary', 'disabled');
+                } else {
+                    alert(data.message || 'Could not save the plan.');
+                }
+            })
+            .catch(error => {
+                console.error('Save Error:', error);
+                alert('An error occurred while saving.');
+            });
+        }
+        
+        function findGroceryStore() {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const mapUrl = `https://www.google.com/maps/search/grocery+store+near+me/@${lat},${lon},15z`;
+                    window.open(mapUrl, '_blank');
+                });
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        }
+
+        function orderOnBlinkit(mealText) {
+            const stopwords = ['with', 'and', 'or', 'a', 'the', 'of', 'in', 'on', 'grilled', 'baked', 'sautéed', 'roasted', 'steamed', 'fried', 'pan-seared', 'mashed', 'seeds', 'cheese', 'oil', 'bread', 'soup', 'salad', 'bowl', 'wraps'];
+            let ingredients = mealText.toLowerCase().replace(/,/g, '').replace(/&/g, '').split(' ').filter(word => !stopwords.includes(word) && word.length > 2);
+            const uniqueIngredients = [...new Set(ingredients)];
+            const searchQuery = uniqueIngredients.join(' ');
+            const encodedQuery = encodeURIComponent(searchQuery);
+            const blinkitUrl = `https://blinkit.com/s/?q=${encodedQuery}`;
+            window.open(blinkitUrl, '_blank');
+        }
+
+        function orderOnSwiggy(mealText) {
+            const searchQuery = mealText.split(' with ')[0].split(' or ')[0];
+            const encodedQuery = encodeURIComponent(searchQuery);
+            const swiggyUrl = `https://www.swiggy.com/search?query=${encodedQuery}`;
+            window.open(swiggyUrl, '_blank');
+        }
+
+        function handleMealSwap(swapButton) {
+            const mealType = swapButton.dataset.mealType;
+            const dietName = document.getElementById('meal-plan-name-hidden').value;
+            const currentMealSpan = document.getElementById(`${mealType}-item`);
+            const currentMeal = currentMealSpan.innerText;
+            
+            swapButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`;
+            swapButton.disabled = true;
+
+            const url = new URL("{{ url_for('get_swap') }}", window.location.origin);
+            url.searchParams.append('diet_name', dietName);
+            url.searchParams.append('meal_type', mealType);
+            url.searchParams.append('current_meal', currentMeal);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.new_meal) {
+                        currentMealSpan.innerText = data.new_meal;
+                        const parentLi = swapButton.closest('li');
+                        parentLi.querySelector('.blinkit-item-btn').dataset.mealText = data.new_meal;
+                        parentLi.querySelector('.swiggy-item-btn').dataset.mealText = data.new_meal;
+                    } else {
+                        alert(data.message || 'Could not find a swap for this meal.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Swap Error:', error);
+                    alert('An error occurred while swapping the meal.');
+                })
+                .finally(() => {
+                    swapButton.innerHTML = `<i class="bi bi-arrow-repeat"></i>`;
+                    swapButton.disabled = false;
+                });
+        }
+        
+        predictBtn.addEventListener('click', function () { 
+            predictionContainer.style.display = 'block';
+            predictionResultDiv.innerHTML = '';
+            loadingSpinner.style.display = 'block';
+
+            fetch("{{ url_for('get_prediction') }}")
+                .then(response => response.json())
+                .then(data => {
+                    loadingSpinner.style.display = 'none';
+                    let html = '';
+                    if (data.success && data.recommendation) {
+                        const plan = data.recommendation;
+                        const nativeShareSupported = navigator.share ? '' : 'd-none';
+                        html = `
+                            <input type="hidden" id="meal-plan-name-hidden" value="${data.meal_plan}">
+                            <div id="diet-plan-content">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div><strong>Breakfast:</strong> <span id="breakfast-item">${plan.breakfast}</span></div>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-secondary swap-btn" title="Swap Breakfast" data-meal-type="breakfast"><i class="bi bi-arrow-repeat"></i></button>
+                                            <button class="btn btn-sm btn-outline-success blinkit-item-btn" title="Order Groceries" data-meal-text="${plan.breakfast}"><i class="bi bi-cart3"></i></button>
+                                            <button class="btn btn-sm btn-outline-warning swiggy-item-btn" title="Order Food" data-meal-text="${plan.breakfast}"><i class="bi bi-truck"></i></button>
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div><strong>Lunch:</strong> <span id="lunch-item">${plan.lunch}</span></div>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-secondary swap-btn" title="Swap Lunch" data-meal-type="lunch"><i class="bi bi-arrow-repeat"></i></button>
+                                            <button class="btn btn-sm btn-outline-success blinkit-item-btn" title="Order Groceries" data-meal-text="${plan.lunch}"><i class="bi bi-cart3"></i></button>
+                                            <button class="btn btn-sm btn-outline-warning swiggy-item-btn" title="Order Food" data-meal-text="${plan.lunch}"><i class="bi bi-truck"></i></button>
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div><strong>Dinner:</strong> <span id="dinner-item">${plan.dinner}</span></div>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-secondary swap-btn" title="Swap Dinner" data-meal-type="dinner"><i class="bi bi-arrow-repeat"></i></button>
+                                            <button class="btn btn-sm btn-outline-success blinkit-item-btn" title="Order Groceries" data-meal-text="${plan.dinner}"><i class="bi bi-cart3"></i></button>
+                                            <button class="btn btn-sm btn-outline-warning swiggy-item-btn" title="Order Food" data-meal-text="${plan.dinner}"><i class="bi bi-truck"></i></button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-start align-items-center gap-2 mt-3 flex-wrap">
+                                <button id="save-plan-btn" class="btn btn-sm btn-outline-primary"><i class="bi bi-bookmark"></i> Save Plan</button>
+                                <button id="print-plan-btn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+                                <button id="find-grocery-btn" class="btn btn-sm btn-outline-info"><i class="bi bi-geo-alt"></i> Find Stores</button>
+                                <div class="btn-group">
+                                  <button type="button" class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i> Share</button>
+                                  <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" id="copy-plan-btn"><i class="bi bi-clipboard"></i> Copy to Clipboard</a></li>
+                                    <li class="${nativeShareSupported}"><a class="dropdown-item" href="#" id="native-share-btn"><i class="bi bi-three-dots"></i> More Options...</a></li>
+                                  </ul>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-3 mb-0 fst-italic" style="font-size: 0.9em;">Tap 'Predict Meal Plan' again for another diet.</p>`;
+                    } else {
+                        html = `<div class="alert alert-warning">${data.message || 'Could not generate a plan.'}</div>`;
+                    }
+                    predictionResultDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    loadingSpinner.style.display = 'none';
+                    predictionResultDiv.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
+                    console.error('Error:', error);
+                });
+        });
+
+        predictionResultDiv.addEventListener('click', function(event) {
+            const printBtn = event.target.closest('#print-plan-btn');
+            const copyBtn = event.target.closest('#copy-plan-btn');
+            const nativeShareBtn = event.target.closest('#native-share-btn');
+            const saveBtn = event.target.closest('#save-plan-btn');
+            const findGroceryBtn = event.target.closest('#find-grocery-btn');
+            const blinkitItemBtn = event.target.closest('.blinkit-item-btn');
+            const swiggyItemBtn = event.target.closest('.swiggy-item-btn');
+            const swapBtn = event.target.closest('.swap-btn');
+
+            if (printBtn) printDietPlan();
+            if (copyBtn) { event.preventDefault(); copyDietPlan(copyBtn); }
+            if (nativeShareBtn) { event.preventDefault(); nativeShareDietPlan(); }
+            if (saveBtn) saveDietPlan(saveBtn);
+            if (findGroceryBtn) findGroceryStore();
+
+            if (blinkitItemBtn) {
+                const mealText = blinkitItemBtn.getAttribute('data-meal-text');
+                orderOnBlinkit(mealText);
+            }
+            if (swiggyItemBtn) {
+                const mealText = swiggyItemBtn.getAttribute('data-meal-text');
+                orderOnSwiggy(mealText);
+            }
+            if (swapBtn) {
+                handleMealSwap(swapBtn);
+            }
+        });
+
+        // --- START OF NEW CODE for Daily Tip ---
+        const dailyTipText = document.getElementById('daily-tip-text');
+
+        function fetchDailyTip() {
+            fetch("{{ url_for('get_daily_tip') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.tip) {
+                        dailyTipText.innerText = `"${data.tip}"`;
+                    } else {
+                        // Provide a fallback tip in case of an error
+                        dailyTipText.innerText = "Stay hydrated and have a great day!";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching daily tip:', error);
+                    dailyTipText.innerText = "Stay hydrated and have a great day!";
+                });
+        }
+
+        // Fetch the daily tip when the page loads
+        fetchDailyTip();
+        // --- END OF NEW CODE ---
+    });
+</script>
+
 {% endblock %}
+

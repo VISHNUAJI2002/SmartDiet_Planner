@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="text-start mb-4">
+        <h2>Your Saved Plans</h2>
+        <p class="text-muted">Here are all the diets and workouts you've saved for future reference.</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs" id="savedPlansTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="diets-tab" data-bs-toggle="tab" data-bs-target="#diets-content" type="button" role="tab" aria-controls="diets-content" aria-selected="true">
+                <i class="bi bi-egg-fried"></i> Saved Diets
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="workouts-tab" data-bs-toggle="tab" data-bs-target="#workouts-content" type="button" role="tab" aria-controls="workouts-content" aria-selected="false">
+                <i class="bi bi-activity"></i> Saved Workouts
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="savedPlansTabContent">
+        
+        <!-- Diets Tab Pane -->
+        <div class="tab-pane fade show active" id="diets-content" role="tabpanel" aria-labelledby="diets-tab">
+            <div class="py-4">
+                {% if saved_diets %}
+                    <div class="row">
+                        {% for plan in saved_diets %}
+                            <div class="col-md-6 col-lg-4 mb-4 plan-card" id="plan-card-{{ plan._id }}">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <div>
+                                            <h5 class="card-title text-success">{{ plan.meal_plan_name }}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.9em;">Saved on: {{ plan.saved_at.strftime('%B %d, %Y') }}</h6>
+                                            <hr>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item ps-0"><strong>Breakfast:</strong> {{ plan.meals.Breakfast }}</li>
+                                                <li class="list-group-item ps-0"><strong>Lunch:</strong> {{ plan.meals.Lunch }}</li>
+                                                <li class="list-group-item ps-0"><strong>Dinner:</strong> {{ plan.meals.Dinner }}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="mt-auto pt-3 text-end">
+                                            <button class="btn btn-sm btn-outline-danger delete-btn" data-plan-id="{{ plan._id }}" data-type="diet" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 no-plans-message">
+                        <p class="lead">You haven't saved any diet plans yet.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-2">Go to Dashboard</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Workouts Tab Pane -->
+        <div class="tab-pane fade" id="workouts-content" role="tabpanel" aria-labelledby="workouts-tab">
+             <div class="py-4">
+                {% if saved_workouts %}
+                    <div class="row">
+                        {% for workout in saved_workouts %}
+                            <div class="col-md-6 col-lg-4 mb-4 plan-card" id="plan-card-{{ workout._id }}">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <div>
+                                            <h5 class="card-title text-info">{{ workout.title }}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.9em;">Saved on: {{ workout.saved_at.strftime('%B %d, %Y') }}</h6>
+                                            <p class="text-muted small">{{ workout.description }}</p>
+                                            <hr>
+                                            <ul class="list-group list-group-flush">
+                                                {% for exercise in workout.plan %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                                                    <span>{{ exercise.name }}</span>
+                                                    <span class="badge bg-primary rounded-pill">{{ exercise.reps_or_duration }}</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="mt-auto pt-3 text-end">
+                                            <button class="btn btn-sm btn-outline-danger delete-btn" data-plan-id="{{ workout._id }}" data-type="workout" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 no-plans-message">
+                        <p class="lead">You haven't saved any workout plans yet.</p>
+                        <a href="{{ url_for('workout_planner') }}" class="btn btn-info text-white mt-2">Create a Workout</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">Are you sure you want to permanently delete this plan?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteModalElement = document.getElementById('deleteConfirmModal');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    let planIdToDelete = null;
+    let planTypeToDelete = null;
+
+    deleteModalElement.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        planIdToDelete = button.getAttribute('data-plan-id');
+        planTypeToDelete = button.getAttribute('data-type');
+    });
+
+    confirmDeleteBtn.addEventListener('click', function () {
+        if (!planIdToDelete || !planTypeToDelete) return;
+        
+        const endpoint = planTypeToDelete === 'diet' ? `/delete-plan/${planIdToDelete}` : `/delete-workout/${planIdToDelete}`;
+
+        fetch(endpoint, { method: 'DELETE' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const cardToRemove = document.getElementById(`plan-card-${planIdToDelete}`);
+                if (cardToRemove) {
+                    cardToRemove.style.transition = 'opacity 0.5s ease';
+                    cardToRemove.style.opacity = '0';
+                    setTimeout(() => {
+                        const parentRow = cardToRemove.closest('.row');
+                        cardToRemove.remove();
+                        if (parentRow && !parentRow.querySelector('.plan-card')) {
+                           const tabPane = parentRow.closest('.tab-pane');
+                           const noPlansMessage = tabPane.querySelector('.no-plans-message');
+                           if(noPlansMessage) {
+                               noPlansMessage.style.display = 'block';
+                           }
+                           parentRow.remove();
+                        }
+                    }, 500);
+                }
+            } else {
+                alert(data.message || 'Could not delete the plan.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`An error occurred: ${error.message}. Please try again.`);
+        })
+        .finally(() => {
+            const modal = bootstrap.Modal.getInstance(deleteModalElement);
+            modal.hide();
+            planIdToDelete = null;
+            planTypeToDelete = null;
+        });
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,139 @@
+{
+    "diets": [
+        {
+            "name": "Balanced Diet",
+            "description": "A wholesome meal plan maintaining balance among carbohydrates, proteins, fats, vitamins, and minerals suitable for everyday nutrition.",
+            "source": "ICMR-NIN, 2020; Eat Right India (FSSAI)",
+            "meal_options": [
+                {
+                    "breakfast": "Idli with sambar and coconut chutney",
+                    "lunch": "Steamed rice with sambar and vegetable poriyal (beans/cabbage/carrot)",
+                    "dinner": "Chapathi with dal or mixed vegetable curry"
+                },
+                {
+                    "breakfast": "Puttu with Kadala (black chickpea) curry",
+                    "lunch": "Kerala Matta rice with avial, thoran, and a non-fried fish curry",
+                    "dinner": "Wheat dosa with tomato chutney and a small bowl of sambar"
+                },
+                {
+                    "breakfast": "Appam with vegetable stew",
+                    "lunch": "Chapathi with mixed vegetable korma and a side salad",
+                    "dinner": "Roti with paneer butter masala (low oil) and green salad"
+                },
+                {
+                    "breakfast": "Banana or glass of milk",
+                    "lunch": "Rasam and curd with papaya",
+                    "dinner": "Salad (tomato, cucumber, onion) and buttermilk"
+                }
+            ]
+        },
+        {
+            "name": "High Protein",
+            "description": "Focuses on lentils, legumes, eggs, paneer, and lean meats to support muscle health and satiety.",
+            "source": "NIN Recommended Dietary Allowances; Nutrition Foundation of India",
+            "meal_options": [
+                {
+                    "breakfast": "Moong dal chilla (pesarattu) with chutney",
+                    "lunch": "Brown rice with dal tadka and spinach poriyal",
+                    "dinner": "Chapathi with sprouted moong salad or egg curry"
+                },
+                {
+                    "breakfast": "Boiled eggs or paneer cubes",
+                    "lunch": "Quinoa with grilled paneer tikka and a large bowl of mixed dal",
+                    "dinner": "Pan-seared fish with a side of steamed broccoli and green beans"
+                },
+                {
+                    "breakfast": "Sprouts salad with chopped onions and tomatoes",
+                    "lunch": "Grilled chicken or fish and curd",
+                    "dinner": "Tofu stir-fry with bell peppers and onions"
+                },
+                {
+                    "breakfast": "Egg bhurji (scrambled eggs) with sautéed spinach",
+                    "lunch": "Soya chunk curry with a small portion of millet rice",
+                    "dinner": "A small bowl of curd"
+                }
+            ]
+        },
+        {
+            "name": "Low Carb",
+            "description": "Reduces carbohydrates by limiting rice, bread, and sugar, emphasizing non-starchy vegetables and proteins.",
+            "source": "National Health Portal India; ICMR-NIN recommendations on metabolic diets",
+            "meal_options": [
+                {
+                    "breakfast": "Ragi dosa or egg omelet with vegetables",
+                    "lunch": "Cauliflower rice with grilled fish or paneer curry",
+                    "dinner": "Vegetable soup and stir-fried beans with spinach"
+                },
+                {
+                    "breakfast": "Scrambled paneer with bell peppers and onions",
+                    "lunch": "A large salad with grilled chicken/tofu and a lemon-herb dressing",
+                    "dinner": "Steamed fish with lemon and herbs, served with asparagus"
+                },
+                {
+                    "breakfast": "Almond milk smoothie with spinach and a few berries",
+                    "lunch": "Chicken or vegetable clear soup with a side of sautéed mushrooms",
+                    "dinner": "Cabbage thoran cooked with coconut and spices"
+                },
+                {
+                    "breakfast": "Coconut water",
+                    "lunch": "Cucumber salad",
+                    "dinner": "Grilled tofu or chicken"
+                }
+            ]
+        },
+        {
+            "name": "Low Fat",
+            "description": "Minimizes fats and oils; emphasizes steamed, boiled, or lightly sauteed foods to support heart and weight health.",
+            "source": "ICMR-NIN, 2020; Eat Right India (FSSAI)",
+            "meal_options": [
+                {
+                    "breakfast": "Idli with tomato chutney (no coconut)",
+                    "lunch": "Steamed rice with sambar (low oil) and boiled vegetable curry",
+                    "dinner": "Oil-free chapathi with bottle gourd curry"
+                },
+                {
+                    "breakfast": "Steamed Rava Idli with a thin sambar",
+                    "lunch": "Puttu with green gram curry (cherupayar curry)",
+                    "dinner": "Appam with vegetable stew (using minimal coconut milk)"
+                },
+                {
+                    "breakfast": "Fruit salad (papaya, apple, orange)",
+                    "lunch": "A large bowl of vegetable clear soup with boiled chicken pieces",
+                    "dinner": "Baked fish with herbs and lemon"
+                },
+                {
+                    "breakfast": "Toned milk",
+                    "lunch": "Rasam and curd",
+                    "dinner": "Vegetable salad and buttermilk"
+                }
+            ]
+        },
+        {
+            "name": "Mediterranean",
+            "description": "Inspired by Mediterranean eating habits, rich in vegetables, olive oil, whole grains, and lean proteins — great for heart health.",
+            "source": "NIN & WHO India collaborative dietary model; FSSAI Eat Right India 2023",
+            "meal_options": [
+                {
+                    "breakfast": "Ragi upma cooked in olive oil with vegetables",
+                    "lunch": "Brown rice or millet with grilled fish/paneer and salad with olive oil dressing",
+                    "dinner": "Whole wheat chapathi with channa masala and sautéed vegetables"
+                },
+                {
+                    "breakfast": "Oats upma with nuts and seeds",
+                    "lunch": "Millet biryani with vegetables and a side of cucumber raita",
+                    "dinner": "Grilled prawns or paneer skewers with a side of sautéed greens"
+                },
+                {
+                    "breakfast": "Fruit salad with a dollop of Greek yogurt (curd)",
+                    "lunch": "Lentil soup with a side of whole-wheat bread and hummus",
+                    "dinner": "A large bowl of lentil and vegetable soup (dalma)"
+                },
+                {
+                    "breakfast": "Handful of almonds or walnuts",
+                    "lunch": "Curd with flaxseed",
+                    "dinner": "Fruit bowl (pomegranate, apple)"
+                }
+            ]
+        }
+    ]
+}

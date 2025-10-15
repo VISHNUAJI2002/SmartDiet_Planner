@@ -2,13 +2,12 @@
 {% block content %}
 
 <div class="container mt-5">
-    <!-- Main profile card -->
     <div class="card shadow-sm p-4" style="max-width: 1100px; margin-left: 40px; border-radius: 12px; border: none;">
 
         {% if profile and profile.age %}
-        <!-- Saved Profile Data -->
         <div class="row">
-            <div class="col-md-12">
+
+            <div class="col-lg-7">
                 <div class="card p-4" style="border: none; border-radius: 12px;">
                     <h3 class="mb-3 text-success text-start">Your Profile</h3>
                     <hr>
@@ -17,54 +16,43 @@
                         <div class="col-md-6 mb-3"><strong>Gender:</strong>
                             {% if profile.gender == "0" %}Male{% else %}Female{% endif %}
                         </div>
-
                         <div class="col-md-6 mb-3"><strong>Height (cm):</strong> {{ profile.height_cm }}</div>
                         <div class="col-md-6 mb-3"><strong>Weight (kg):</strong> {{ profile.weight_kg }}</div>
-
-                        <div class="col-md-6 mb-3"><strong>BMI:</strong> {{ profile.bmi }}</div>
+                        <div class="col-md-6 mb-3"><strong>BMI:</strong> {{ "%.2f"|format(profile.bmi|float) }}</div>
                         <div class="col-md-6 mb-3"><strong>Chronic Disease:</strong>
                             {% if profile.chronic_disease == "1" %}Yes{% else %}No{% endif %}
                         </div>
-
-                        <div class="col-md-6 mb-3"><strong>BP Systolic:</strong> {{ profile.blood_pressure_systolic }}
-                        </div>
-                        <div class="col-md-6 mb-3"><strong>BP Diastolic:</strong> {{ profile.blood_pressure_diastolic }}
-                        </div>
-
-                        <div class="col-md-6 mb-3"><strong>Cholesterol Level:</strong> {{ profile.cholesterol_level }}
-                        </div>
-                        <div class="col-md-6 mb-3"><strong>Blood Sugar Level:</strong> {{ profile.blood_sugar_level }}
-                        </div>
-
+                        <div class="col-md-6 mb-3"><strong>BP Systolic:</strong> {{ profile.blood_pressure_systolic }}</div>
+                        <div class="col-md-6 mb-3"><strong>BP Diastolic:</strong> {{ profile.blood_pressure_diastolic }}</div>
+                        <div class="col-md-6 mb-3"><strong>Cholesterol Level:</strong> {{ profile.cholesterol_level }}</div>
+                        <div class="col-md-6 mb-3"><strong>Blood Sugar Level:</strong> {{ profile.blood_sugar_level }}</div>
                         <div class="col-md-6 mb-3"><strong>Sleep Hours:</strong> {{ profile.sleep_hours }}</div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="col-lg-5 d-flex align-items-center justify-content-center">
+                <div class="card p-3 text-center w-100" style="border: none;">
+                    <!-- NOTE: The ApexCharts script for this div needs to be included on this page for it to render. -->
+                    <div id="bmi_chart_div" style="width: 100%; height: 280px;"></div>
+                </div>
+            </div>
+            </div>
 
-        <!-- Action buttons -->
+        <!-- MODIFIED: "Predict Meal Plan" button has been removed from here -->
         <div class="d-flex gap-3 mt-4">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
                 Update Profile
             </button>
-
-            {% if profile.age and profile.gender and profile.height_cm and profile.weight_kg %}
-            <a href="{{ url_for('predict') }}" class="btn btn-success">🍴 Predict Meal Plan</a>
-            {% endif %}
         </div>
 
         {% else %}
-        <!-- New User: Show form directly -->
         <h3 class="mb-3 text-primary text-start">Complete Your Profile</h3>
         <p class="text-muted">Please enter your details to get personalized diet recommendations.</p>
-
         <form method="POST" class="row g-3">
-
             <div class="col-md-6">
                 <label class="form-label">Age</label>
                 <input type="number" name="age" class="form-control" required>
             </div>
-
             <div class="col-md-6">
                 <label class="form-label">Gender</label>
                 <select name="gender" class="form-select" required>
@@ -72,22 +60,14 @@
                     <option value="1">Female</option>
                 </select>
             </div>
-
             <div class="col-md-6">
                 <label class="form-label">Height (cm)</label>
-                <input type="number" name="height_cm" class="form-control">
+                <input type="number" name="height_cm" class="form-control" required>
             </div>
-
             <div class="col-md-6">
                 <label class="form-label">Weight (kg)</label>
-                <input type="number" name="weight_kg" class="form-control">
+                <input type="number" name="weight_kg" class="form-control" required>
             </div>
-
-            <div class="col-md-6">
-                <label class="form-label">BMI</label>
-                <input type="number" step="0.1" name="bmi" class="form-control" readonly>
-            </div>
-
             <div class="col-md-6">
                 <label class="form-label">Chronic Disease</label>
                 <select name="chronic_disease" class="form-select">
@@ -95,52 +75,31 @@
                     <option value="1">Yes</option>
                 </select>
             </div>
-
+            <!-- REMOVED 'required' from the inputs below -->
             <div class="col-md-6">
                 <label class="form-label">BP Systolic</label>
-                <select name="blood_pressure_systolic" class="form-select">
-                    <option value="120">Normal</option>
-                    <option value="140">High</option>
-                    <option value="100">Low</option>
-                </select>
+                <input type="number" name="blood_pressure_systolic" class="form-control" placeholder="e.g., 120">
             </div>
-
             <div class="col-md-6">
                 <label class="form-label">BP Diastolic</label>
-                <select name="blood_pressure_diastolic" class="form-select">
-                    <option value="80">Normal</option>
-                    <option value="90">High</option>
-                    <option value="60">Low</option>
-                </select>
+                <input type="number" name="blood_pressure_diastolic" class="form-control" placeholder="e.g., 80">
             </div>
-
             <div class="col-md-6">
-                <label class="form-label">Cholesterol</label>
-                <select name="cholesterol_level" class="form-select">
-                    <option value="180">Normal</option>
-                    <option value="220">Borderline</option>
-                    <option value="250">High</option>
-                </select>
+                <label class="form-label">Cholesterol (mg/dL)</label>
+                <input type="number" name="cholesterol_level" class="form-control" placeholder="e.g., 200">
             </div>
-
             <div class="col-md-6">
-                <label class="form-label">Blood Sugar</label>
-                <select name="blood_sugar_level" class="form-select">
-                    <option value="90">Normal</option>
-                    <option value="120">Prediabetic</option>
-                    <option value="140">Diabetic</option>
-                </select>
+                <label class="form-label">Blood Sugar (mg/dL)</label>
+                <input type="number" name="blood_sugar_level" class="form-control" placeholder="e.g., 100">
             </div>
-
             <div class="col-md-6">
                 <label class="form-label">Sleep Hours</label>
                 <select name="sleep_hours" class="form-select">
-                    <option value="5">Poor</option>
                     <option value="7">Good</option>
+                    <option value="5">Poor</option>
                     <option value="9">Excessive</option>
                 </select>
             </div>
-
             <div class="col-12 d-grid">
                 <button type="submit" class="btn btn-success btn-lg">Save Profile</button>
             </div>
@@ -149,7 +108,7 @@
     </div>
 </div>
 
-<!-- Update Profile Modal for existing users -->
+<!-- Update Profile Modal -->
 <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content p-4" style="border: none;">
@@ -159,12 +118,10 @@
             </div>
             <div class="modal-body">
                 <form method="POST" class="row g-3">
-
                     <div class="col-md-6">
                         <label class="form-label">Age</label>
                         <input type="number" name="age" class="form-control" value="{{ profile.age }}" required>
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Gender</label>
                         <select name="gender" class="form-select" required>
@@ -172,23 +129,16 @@
                             <option value="1" {% if profile.gender=="1" %}selected{% endif %}>Female</option>
                         </select>
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Height (cm)</label>
-                        <input type="number" name="height_cm" class="form-control" value="{{ profile.height_cm }}">
+                        <input type="number" name="height_cm" class="form-control"
+                            value="{{ profile.height_cm }}">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Weight (kg)</label>
-                        <input type="number" name="weight_kg" class="form-control" value="{{ profile.weight_kg }}">
+                        <input type="number" name="weight_kg" class="form-control"
+                            value="{{ profile.weight_kg }}">
                     </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">BMI</label>
-                        <input type="number" step="0.1" name="bmi" class="form-control" value="{{ profile.bmi }}"
-                            readonly>
-                    </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Chronic Disease</label>
                         <select name="chronic_disease" class="form-select">
@@ -196,64 +146,34 @@
                             <option value="1" {% if profile.chronic_disease=="1" %}selected{% endif %}>Yes</option>
                         </select>
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">BP Systolic</label>
-                        <select name="blood_pressure_systolic" class="form-select">
-                            <option value="120" {% if profile.blood_pressure_systolic=="120" %}selected{% endif %}>
-                                Normal</option>
-                            <option value="140" {% if profile.blood_pressure_systolic=="140" %}selected{% endif %}>High
-                            </option>
-                            <option value="100" {% if profile.blood_pressure_systolic=="100" %}selected{% endif %}>Low
-                            </option>
-                        </select>
+                        <input type="number" name="blood_pressure_systolic" class="form-control"
+                            value="{{ profile.blood_pressure_systolic }}" placeholder="e.g., 120">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">BP Diastolic</label>
-                        <select name="blood_pressure_diastolic" class="form-select">
-                            <option value="80" {% if profile.blood_pressure_diastolic=="80" %}selected{% endif %}>Normal
-                            </option>
-                            <option value="90" {% if profile.blood_pressure_diastolic=="90" %}selected{% endif %}>High
-                            </option>
-                            <option value="60" {% if profile.blood_pressure_diastolic=="60" %}selected{% endif %}>Low
-                            </option>
-                        </select>
+                        <input type="number" name="blood_pressure_diastolic" class="form-control"
+                            value="{{ profile.blood_pressure_diastolic }}" placeholder="e.g., 80">
                     </div>
-
                     <div class="col-md-6">
-                        <label class="form-label">Cholesterol</label>
-                        <select name="cholesterol_level" class="form-select">
-                            <option value="180" {% if profile.cholesterol_level=="180" %}selected{% endif %}>Normal
-                            </option>
-                            <option value="220" {% if profile.cholesterol_level=="220" %}selected{% endif %}>Borderline
-                            </option>
-                            <option value="250" {% if profile.cholesterol_level=="250" %}selected{% endif %}>High
-                            </option>
-                        </select>
+                        <label class="form-label">Cholesterol (mg/dL)</label>
+                        <input type="number" name="cholesterol_level" class="form-control"
+                            value="{{ profile.cholesterol_level }}" placeholder="e.g., 200">
                     </div>
-
                     <div class="col-md-6">
-                        <label class="form-label">Blood Sugar</label>
-                        <select name="blood_sugar_level" class="form-select">
-                            <option value="90" {% if profile.blood_sugar_level=="90" %}selected{% endif %}>Normal
-                            </option>
-                            <option value="120" {% if profile.blood_sugar_level=="120" %}selected{% endif %}>Prediabetic
-                            </option>
-                            <option value="140" {% if profile.blood_sugar_level=="140" %}selected{% endif %}>Diabetic
-                            </option>
-                        </select>
+                        <label class="form-label">Blood Sugar (mg/dL)</label>
+                        <input type="number" name="blood_sugar_level" class="form-control"
+                            value="{{ profile.blood_sugar_level }}" placeholder="e.g., 100">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Sleep Hours</label>
                         <select name="sleep_hours" class="form-select">
+                            <option value="7" {% if profile.sleep_hours=="7" or not profile.sleep_hours %}selected{% endif %}>Good</option>
                             <option value="5" {% if profile.sleep_hours=="5" %}selected{% endif %}>Poor</option>
-                            <option value="7" {% if profile.sleep_hours=="7" %}selected{% endif %}>Good</option>
                             <option value="9" {% if profile.sleep_hours=="9" %}selected{% endif %}>Excessive</option>
                         </select>
                     </div>
-
                     <div class="col-12 d-grid">
                         <button type="submit" class="btn btn-success btn-lg">Save Changes</button>
                     </div>
@@ -263,4 +183,29 @@
     </div>
 </div>
 
+<!-- This script is needed to render the BMI gauge on this page -->
+{% if profile and profile.bmi %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const bmiValue = parseFloat("{{ profile.bmi }}");
+        function getBmiDetails(bmi) {
+            if (bmi < 18.5) return { status: "Underweight", color: "#26a69a" };
+            if (bmi < 24.9) return { status: "Normal", color: "#81d4fa" };
+            if (bmi < 29.9) return { status: "Overweight", color: "#03a9f4" };
+            return { status: "Obesity", color: "#ef5350" };
+        }
+        const bmiDetails = getBmiDetails(bmiValue);
+        var options = {
+            series: [bmiValue], chart: { type: 'radialBar', offsetY: -20, sparkline: { enabled: true } },
+            plotOptions: { radialBar: { startAngle: -120, endAngle: 120, min: 10, max: 45, track: { background: '#e0e0e0', strokeWidth: '97%', margin: 5, }, dataLabels: { name: { show: true, offsetY: 60, fontSize: '22px', color: bmiDetails.color, formatter: (val) => bmiDetails.status }, value: { offsetY: 10, fontSize: '36px', formatter: (val) => val.toFixed(1) } } } },
+            grid: { padding: { top: -10 } }, fill: { colors: [bmiDetails.color] }, labels: ['BMI'],
+        };
+        var chart = new ApexCharts(document.querySelector("#bmi_chart_div"), options);
+        chart.render();
+    });
+</script>
+{% endif %}
+
 {% endblock %}
+

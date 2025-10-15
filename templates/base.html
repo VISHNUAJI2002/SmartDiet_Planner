@@ -22,9 +22,12 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto fs-5">
+        <!-- MODIFIED: Added me-3 class for better alignment -->
+        <ul class="navbar-nav ms-auto fs-5 me-3">
           {% if current_user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <!-- NEW: Link to the Saved Plans page -->
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('saved_plans') }}">Saved-Plans</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profile</a></li>
           <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a></li>
           {% else %}
@@ -36,7 +39,8 @@
     </div>
   </nav>
 
-  <div class="container mt-4">
+  <!-- MODIFIED: Changed mt-4 to mt-3 to move content up -->
+  <div class="container mt-3">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
@@ -52,3 +56,4 @@
 </body>
 
 </html>
+

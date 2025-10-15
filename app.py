@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_pymongo import PyMongo
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,11 +8,14 @@ import os
 import joblib
 import numpy as np
 import tensorflow as tf
+import random
+from datetime import datetime
+import json
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/helio")
+app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/ProjectHelio")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
 
 mongo = PyMongo(app)
@@ -21,6 +24,40 @@ mongo = PyMongo(app)
 model = tf.keras.models.load_model("model/diet_model.keras")
 scaler = joblib.load("model/scaler.pkl")
 meal_encoder = joblib.load("model/meal_encoder.pkl")
+
+# --- Load Diet, Workout, and Health Tip Data ---
+def load_diet_plans():
+    try:
+        with open('data/diet_plans.json', 'r') as f:
+            data = json.load(f)
+        return {diet['name']: diet for diet in data['diets']}
+    except Exception as e:
+        print(f"ERROR loading diet plans: {e}")
+        return {}
+
+def load_workout_plans():
+    try:
+        with open('data/workouts.json', 'r') as f:
+            data = json.load(f)
+        return data.get('workout_plans', [])
+    except Exception as e:
+        print(f"ERROR loading workout plans: {e}")
+        return []
+
+# NEW: Function to load health tips
+def load_health_tips():
+    try:
+        with open('data/health_tips.json', 'r') as f:
+            data = json.load(f)
+        return data.get('tips', [])
+    except Exception as e:
+        print(f"ERROR loading health tips: {e}")
+        return []
+
+DIET_PLANS_DATA = load_diet_plans()
+WORKOUT_PLANS_DATA = load_workout_plans()
+HEALTH_TIPS_DATA = load_health_tips() # NEW
+
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
@@ -76,18 +113,8 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    # Convert cursor to list
-    user_likes = list(mongo.db.likes.find({"user_id": current_user.id}))
-
-    # Fetch profile info
     profile = mongo.db.profiles.find_one({"user_id": current_user.id})
-
-    return render_template(
-        "dashboard.html",
-        username=current_user.username,
-        user_likes=user_likes,
-        profile=profile
-    )
+    return render_template( "dashboard.html", profile=profile )
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -98,24 +125,17 @@ def profile():
         gender = request.form.get("gender")
         height_cm = request.form.get("height_cm")
         weight_kg = request.form.get("weight_kg")
-
-        # Auto calculate BMI
-        bmi = request.form.get("bmi")  # allow manual override
+        bmi = None
         if height_cm and weight_kg:
             try:
                 height_m = float(height_cm) / 100
                 weight = float(weight_kg)
                 bmi = round(weight / (height_m ** 2), 1)
-            except:
+            except (ValueError, ZeroDivisionError):
                 bmi = None
-
         data = {
-            "user_id": current_user.id,
-            "age": age,
-            "gender": gender,
-            "height_cm": height_cm,
-            "weight_kg": weight_kg,
-            "bmi": bmi,
+            "user_id": current_user.id, "age": age, "gender": gender,
+            "height_cm": height_cm, "weight_kg": weight_kg, "bmi": bmi,
             "chronic_disease": request.form.get("chronic_disease"),
             "blood_pressure_systolic": request.form.get("blood_pressure_systolic"),
             "blood_pressure_diastolic": request.form.get("blood_pressure_diastolic"),
@@ -123,203 +143,165 @@ def profile():
             "blood_sugar_level": request.form.get("blood_sugar_level"),
             "sleep_hours": request.form.get("sleep_hours"),
         }
-
-        # 🔑 Overwrites if exists, inserts if not
-        mongo.db.profiles.update_one(
-            {"user_id": current_user.id}, {"$set": data}, upsert=True
-        )
-
+        mongo.db.profiles.update_one({"user_id": current_user.id}, {"$set": data}, upsert=True)
         flash("Profile updated successfully!", "success")
         return redirect(url_for("profile"))
-
-    # Fetch profile (may not exist for new users)
     profile = mongo.db.profiles.find_one({"user_id": current_user.id})
-
     return render_template("profile.html", profile=profile)
 
 
-@app.route("/predict")
+@app.route("/get-prediction")
 @login_required
-def predict():
-    profile = mongo.db.profiles.find_one({"user_id": current_user.id})
+def get_prediction():
+    profile = mongo.db.profiles.find_one({"user_id": current_user.id}) or {}
+    if not all(k in profile for k in ["age", "gender", "height_cm", "weight_kg"]) or not profile["age"]:
+        return jsonify({"success": False, "message": "Please complete your profile first! Age, gender, height, and weight are required."})
+    try:
+        features = [
+            float(profile.get("age")), float(profile.get("gender")), float(profile.get("height_cm")), float(profile.get("weight_kg")),
+            float(profile.get("bmi") or 24.2), float(profile.get("chronic_disease") or 0),
+            float(profile.get("blood_pressure_systolic") or 120), float(profile.get("blood_pressure_diastolic") or 80),
+            float(profile.get("cholesterol_level") or 180), float(profile.get("blood_sugar_level") or 95),
+            float(profile.get("sleep_hours") or 7),
+        ]
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "message": "Invalid data in profile. Please check your details."})
 
-    if not profile:
-        flash("Please complete your profile first!", "danger")
-        return redirect(url_for("profile"))
-
-    # required fields
-    required_fields = ["age", "height_cm", "weight_kg"]
-    for field in required_fields:
-        if not profile.get(field):
-            flash("Age, Height, and Weight are required for prediction!", "danger")
-            return redirect(url_for("profile"))
-
-    # build features
-    features = [
-        float(profile.get("age", 0)),
-        float(profile.get("gender", 0)),
-        float(profile.get("height_cm", 0)),
-        float(profile.get("weight_kg", 0)),
-        float(profile.get("bmi", 0)),
-        float(profile.get("chronic_disease", 0)),
-        float(profile.get("blood_pressure_systolic", 0)),
-        float(profile.get("blood_pressure_diastolic", 0)),
-        float(profile.get("cholesterol_level", 0)),
-        float(profile.get("blood_sugar_level", 0)),
-        float(profile.get("sleep_hours", 0)),
-    ]
-
-    # predict
     features_scaled = scaler.transform([features])
     prediction = model.predict(features_scaled)
     meal_idx = int(np.argmax(prediction))
+    meal_plan_map = {0: "Balanced Diet", 1: "High Protein", 2: "Low Carb", 3: "Low Fat", 4: "Mediterranean"}
+    meal_plan_name = meal_plan_map.get(meal_idx)
 
-    # mapping index -> diet name
-    meal_plan_map = {
-        0: "Balanced Diet",
-        1: "High Protein",
-        2: "Low Carb Diet",
-        3: "Low Fat Diet",
-        4: "Mediterranean"
-    }
-    meal_plan = meal_plan_map.get(meal_idx, "Unknown Plan")
+    if not meal_plan_name or meal_plan_name not in DIET_PLANS_DATA:
+        return jsonify({"success": False, "message": "Could not find a matching diet plan for the prediction."})
+    
+    predicted_diet_data = DIET_PLANS_DATA[meal_plan_name]
+    all_recommendations = predicted_diet_data.get("meal_options", [])
+    
+    single_recommendation = None
+    if all_recommendations:
+        single_recommendation = random.choice(all_recommendations)
 
-    # description dictionary
-    meal_plan_descriptions = {
-        "Balanced Diet": "Provides a proportionate mix of macronutrients (carbs, proteins, fats) and micronutrients for overall health.",
-        "High Protein": "Prioritizes protein intake to support muscle repair, satiety, and metabolic function.",
-        "Low Carb Diet": "Reduces carbohydrate intake significantly, encouraging the body to use fat as the primary fuel source.",
-        "Low Fat Diet": "Limits total fat intake, particularly saturated fats, to support cardiac health and weight management.",
-        "Mediterranean": "Inspired by Mediterranean eating habits, rich in vegetables, olive oil, whole grains, and lean proteins — great for heart health."
-    }
-
-    # meal plan options (two example 3-meal options per diet)
-    meal_plan_details = {
-        "Balanced Diet": [
-            {
-                "Breakfast": "Oats with nuts and banana",
-                "Lunch": "Salad with grilled chicken and whole-wheat bread",
-                "Dinner": "Grilled fish with sautéed vegetables and quinoa"
-            },
-            {
-                "Breakfast": "Whole-grain toast with avocado and poached egg",
-                "Lunch": "Quinoa bowl with black beans, corn, and roasted veggies",
-                "Dinner": "Stir-fried tofu with broccoli, bell peppers, and brown rice"
-            }
-        ],
-        "High Protein": [
-            {
-                "Breakfast": "Scrambled eggs with spinach and Greek yogurt",
-                "Lunch": "Grilled chicken with lentil soup and broccoli",
-                "Dinner": "Lean steak or baked tofu with mixed vegetables"
-            },
-            {
-                "Breakfast": "Cottage cheese with almonds, blueberries, hemp seeds",
-                "Lunch": "Turkey lettuce wraps with hummus and sliced veggies",
-                "Dinner": "Baked lemon-herb cod with quinoa salad and edamame"
-            }
-        ],
-        "Low Carb Diet": [
-            {
-                "Breakfast": "Avocado and egg bowl with chia seeds",
-                "Lunch": "Spinach salad with chicken, feta, olives, olive oil",
-                "Dinner": "Pan-seared salmon with kale and mushrooms"
-            },
-            {
-                "Breakfast": "Spinach & feta omelet with sautéed mushrooms",
-                "Lunch": "Zucchini noodles with pesto, shrimp, sun-dried tomatoes",
-                "Dinner": "Roast chicken thighs with cauliflower mash & green beans"
-            }
-        ],
-        "Low Fat Diet": [
-            {
-                "Breakfast": "Oatmeal with skim milk, berries, banana",
-                "Lunch": "Lentil vegetable soup with whole-grain crackers",
-                "Dinner": "Steamed chicken breast with brown rice and veggies"
-            },
-            {
-                "Breakfast": "Smoothie with skim milk, banana, mango, protein powder",
-                "Lunch": "Baked potato with fat-free Greek yogurt and broccoli",
-                "Dinner": "Shrimp and veggie skewers with seasoned brown rice"
-            }
-        ],
-        "Mediterranean": [
-            {
-                "Breakfast": "Greek yogurt with walnuts, honey, fresh figs",
-                "Lunch": "Chickpea & quinoa salad with cucumber, tomatoes, feta",
-                "Dinner": "Baked salmon with roasted asparagus and whole-wheat pita"
-            },
-            {
-                "Breakfast": "Whole-wheat pita with hummus, cucumbers, olives",
-                "Lunch": "Farro salad with olives, tomatoes, feta, lemon dressing",
-                "Dinner": "Grilled lamb chops with roasted eggplant & zucchini"
-            }
-        ]
-    }
-
-    # get recommendations (MUST do this BEFORE counting likes per plan)
-    recommendations = meal_plan_details.get(meal_plan, [])
-    description = meal_plan_descriptions.get(meal_plan, "A healthy meal plan recommendation.")
-
-    # likes per plan (plan-level counts) and whether current user liked each plan
-    likes_per_plan = []
-    user_liked_per_plan = []
-    for i, plan in enumerate(recommendations, start=1):
-        count = mongo.db.likes.count_documents({
-            "diet_name": meal_plan,
-            "plan_index": i
-        })
-        likes_per_plan.append(count)
-
-        # check if current user already liked this specific plan
-        existing = mongo.db.likes.find_one({
-            "user_id": current_user.id,
-            "diet_name": meal_plan,
-            "plan_index": i
-        })
-        user_liked_per_plan.append(existing is not None)
-
-    # total likes for the whole diet (optional)
-    total_likes = mongo.db.likes.count_documents({"diet_name": meal_plan})
-
-    return render_template(
-        "prediction.html",
-        meal=meal_plan,
-        description=description,
-        recommendations=recommendations,
-        likes_per_plan=likes_per_plan,
-        user_liked_per_plan=user_liked_per_plan,
-        total_likes=total_likes
-    )
+    return jsonify({ "success": True, "meal_plan": meal_plan_name, "recommendation": single_recommendation })
 
 
-@app.route("/like/<diet_name>/<int:plan_index>")
+@app.route("/get-swap", methods=["GET"])
 @login_required
-def like_diet(diet_name, plan_index):
-    existing_like = mongo.db.likes.find_one({
-        "user_id": current_user.id,
-        "diet_name": diet_name,
-        "plan_index": plan_index
-    })
+def get_swap():
+    diet_name = request.args.get("diet_name")
+    meal_type = request.args.get("meal_type")
+    current_meal = request.args.get("current_meal")
 
-    if existing_like:
-        # Unlike (remove document)
-        mongo.db.likes.delete_one({
-            "user_id": current_user.id,
-            "diet_name": diet_name,
-            "plan_index": plan_index
-        })
-        flash(f"You unliked {diet_name} - Diet {plan_index}", "info")
+    if not diet_name or not meal_type or not current_meal:
+        return jsonify({"success": False, "message": "Missing required parameters."}), 400
+
+    diet_data = DIET_PLANS_DATA.get(diet_name)
+    if not diet_data:
+        return jsonify({"success": False, "message": "Invalid diet name."}), 404
+
+    meal_options = diet_data.get("meal_options", [])
+    possible_swaps = [
+        option[meal_type] for option in meal_options 
+        if meal_type in option and option[meal_type] != current_meal
+    ]
+
+    if not possible_swaps:
+        return jsonify({"success": True, "new_meal": current_meal})
+
+    new_meal = random.choice(possible_swaps)
+    return jsonify({"success": True, "new_meal": new_meal})
+
+
+@app.route("/workout-planner", methods=["GET"])
+@login_required
+def workout_planner():
+    if request.args.get('json') == 'true':
+        goal = request.args.get('goal')
+        level = request.args.get('level')
+        duration = request.args.get('duration')
+        found_plan = None
+        for plan in WORKOUT_PLANS_DATA:
+            if plan['goal'] == goal and plan['level'] == level and plan['duration'] == duration:
+                found_plan = plan
+                break
+        if found_plan:
+            return jsonify({"success": True, "plan": found_plan})
+        else:
+            return jsonify({"success": False, "message": "No matching workout found."})
+    return render_template("workout_planner.html")
+
+
+@app.route("/save-workout", methods=["POST"])
+@login_required
+def save_workout():
+    data = request.json
+    if not data or 'title' not in data or 'plan' not in data:
+        return jsonify({"success": False, "message": "Invalid data."}), 400
+    saved_workout = {
+        "user_id": current_user.id, "title": data.get("title"),
+        "description": data.get("description"), "plan": data.get("plan"),
+        "saved_at": datetime.utcnow()
+    }
+    mongo.db.saved_workouts.insert_one(saved_workout)
+    return jsonify({"success": True, "message": "Workout saved successfully!"})
+
+
+@app.route("/save-prediction", methods=["POST"])
+@login_required
+def save_prediction():
+    data = request.json
+    meal_plan_name = data.get("meal_plan_name")
+    meals = data.get("meals")
+    if not meal_plan_name or not meals:
+        return jsonify({"success": False, "message": "Missing data."}), 400
+    saved_plan = {
+        "user_id": current_user.id, "meal_plan_name": meal_plan_name,
+        "meals": meals, "saved_at": datetime.utcnow()
+    }
+    mongo.db.saved_plans.insert_one(saved_plan)
+    return jsonify({"success": True, "message": "Plan saved successfully!"})
+
+
+@app.route("/saved-plans")
+@login_required
+def saved_plans():
+    user_saved_diets = list(mongo.db.saved_plans.find({"user_id": current_user.id}).sort("saved_at", -1))
+    user_saved_workouts = list(mongo.db.saved_workouts.find({"user_id": current_user.id}).sort("saved_at", -1))
+    return render_template("saved_plans.html", saved_diets=user_saved_diets, saved_workouts=user_saved_workouts)
+
+
+@app.route("/delete-plan/<string:plan_id>", methods=["DELETE"])
+@login_required
+def delete_plan(plan_id):
+    result = mongo.db.saved_plans.delete_one({"_id": ObjectId(plan_id), "user_id": current_user.id})
+    if result.deleted_count == 1:
+        return jsonify({"success": True, "message": "Plan deleted successfully."})
     else:
-        # Like (insert document)
-        mongo.db.likes.insert_one({
-            "user_id": current_user.id,
-            "diet_name": diet_name,
-            "plan_index": plan_index
-        })
-        flash(f"You liked {diet_name} - Diet {plan_index}", "success")
+        return jsonify({"success": False, "message": "Plan not found or permission denied."}), 404
 
-    return redirect(url_for("predict"))
+
+@app.route("/delete-workout/<string:workout_id>", methods=["DELETE"])
+@login_required
+def delete_workout(workout_id):
+    result = mongo.db.saved_workouts.delete_one({"_id": ObjectId(workout_id), "user_id": current_user.id})
+    if result.deleted_count == 1:
+        return jsonify({"success": True, "message": "Workout deleted successfully."})
+    else:
+        return jsonify({"success": False, "message": "Workout not found or permission denied."}), 404
+
+
+# --- START OF NEW CODE: Daily Health Tip ---
+@app.route("/get-daily-tip")
+@login_required
+def get_daily_tip():
+    """API endpoint to get a random health tip."""
+    if not HEALTH_TIPS_DATA:
+        return jsonify({"success": False, "message": "Health tips are currently unavailable."})
+    
+    tip = random.choice(HEALTH_TIPS_DATA)
+    return jsonify({"success": True, "tip": tip})
+# --- END OF NEW CODE ---
 
 
 @app.route("/logout")
@@ -331,3 +313,4 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
+

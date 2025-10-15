@@ -1,0 +1,183 @@
+{
+  "workout_plans": [
+    {
+      "goal": "Weight Loss",
+      "level": "Beginner",
+      "duration": "15-20",
+      "title": "Beginner Cardio Kickstart",
+      "description": "A short, effective routine to boost your heart rate and start burning calories. Focus on steady movement.",
+      "plan": [
+        { "name": "Warm-up: Marching in Place & Arm Circles", "reps_or_duration": "3 minutes" },
+        { "name": "Jumping Jacks", "reps_or_duration": "3 sets of 30 seconds" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "2 sets of 12 reps" },
+        { "name": "High Knees", "reps_or_duration": "3 sets of 20 seconds" },
+        { "name": "Cool-down: Full Body Stretching", "reps_or_duration": "3 minutes" }
+      ]
+    },
+    {
+      "goal": "Weight Loss",
+      "level": "Beginner",
+      "duration": "30-40",
+      "title": "Beginner Endurance Builder",
+      "description": "A longer session designed to improve stamina and maximize calorie burn at a beginner-friendly pace.",
+      "plan": [
+        { "name": "Warm-up: Light Jogging & Arm Swings", "reps_or_duration": "5 minutes" },
+        { "name": "Jumping Jacks", "reps_or_duration": "4 sets of 45 seconds" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Alternating Step-Back Lunges", "reps_or_duration": "3 sets of 10 reps per leg" },
+        { "name": "High Knees", "reps_or_duration": "4 sets of 30 seconds" },
+        { "name": "Plank", "reps_or_duration": "3 sets, hold for 30 seconds" },
+        { "name": "Cool-down: Deep Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    },
+    {
+      "goal": "Weight Loss",
+      "level": "Intermediate",
+      "duration": "15-20",
+      "title": "Express HIIT Blast",
+      "description": "A quick and intense High-Intensity Interval Training (HIIT) session to get your heart rate up fast. Perfect for a busy schedule.",
+      "plan": [
+        { "name": "Warm-up: High Knees & Butt Kicks", "reps_or_duration": "2 minutes" },
+        { "name": "Burpees", "reps_or_duration": "3 sets of 40 seconds on, 20 seconds off" },
+        { "name": "Mountain Climbers", "reps_or_duration": "3 sets of 40 seconds on, 20 seconds off" },
+        { "name": "Jump Squats", "reps_or_duration": "3 sets of 40 seconds on, 20 seconds off" },
+        { "name": "Cool-down: Light Stretching", "reps_or_duration": "3 minutes" }
+      ]
+    },
+    {
+      "goal": "Weight Loss",
+      "level": "Intermediate",
+      "duration": "30-40",
+      "title": "Fat Burner Circuit",
+      "description": "A circuit-style workout to maximize calorie burn. Move from one exercise to the next with minimal rest.",
+      "plan": [
+        { "name": "Warm-up: Jogging in Place & Leg Swings", "reps_or_duration": "5 minutes" },
+        { "name": "Burpees", "reps_or_duration": "3 sets of 12 reps" },
+        { "name": "Mountain Climbers", "reps_or_duration": "3 sets of 45 seconds" },
+        { "name": "Jump Squats", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Plank with Shoulder Taps", "reps_or_duration": "3 sets of 20 reps total" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    },
+    {
+      "goal": "Muscle Building",
+      "level": "Beginner",
+      "duration": "15-20",
+      "title": "Foundation Strength",
+      "description": "Focus on the fundamental movements to build a strong base. Control each repetition.",
+      "plan": [
+        { "name": "Warm-up: Arm Circles & Cat-Cow Stretch", "reps_or_duration": "3 minutes" },
+        { "name": "Push-ups (on knees if needed)", "reps_or_duration": "3 sets of 8-10 reps" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Glute Bridges", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "2 minutes" }
+      ]
+    },
+    {
+      "goal": "Muscle Building",
+      "level": "Beginner",
+      "duration": "30-40",
+      "title": "Beginner Full Body Strength",
+      "description": "A comprehensive workout for beginners to target all major muscle groups and build a solid foundation.",
+      "plan": [
+        { "name": "Warm-up: Dynamic Stretches", "reps_or_duration": "5 minutes" },
+        { "name": "Push-ups (on knees if needed)", "reps_or_duration": "3 sets of 10-12 reps" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "3 sets of 20 reps" },
+        { "name": "Alternating Lunges", "reps_or_duration": "3 sets of 10 reps per leg" },
+        { "name": "Plank", "reps_or_duration": "3 sets, hold for 45 seconds" },
+        { "name": "Glute Bridges", "reps_or_duration": "3 sets of 20 reps" },
+        { "name": "Cool-down: Full Body Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    },
+    {
+      "goal": "Muscle Building",
+      "level": "Intermediate",
+      "duration": "15-20",
+      "title": "Power Core Express",
+      "description": "A quick routine focusing on compound movements to challenge your muscles in a short amount of time.",
+      "plan": [
+        { "name": "Warm-up: Jumping Jacks", "reps_or_duration": "2 minutes" },
+        { "name": "Diamond Push-ups", "reps_or_duration": "3 sets to failure" },
+        { "name": "Pistol Squats (assisted if needed)", "reps_or_duration": "3 sets of 8 reps per leg" },
+        { "name": "Plank Up-Downs", "reps_or_duration": "3 sets of 12 reps" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "3 minutes" }
+      ]
+    },
+    {
+      "goal": "Muscle Building",
+      "level": "Intermediate",
+      "duration": "30-40",
+      "title": "Full Body Sculpt",
+      "description": "A challenging routine targeting all major muscle groups to promote growth.",
+      "plan": [
+        { "name": "Warm-up: Dynamic Stretches", "reps_or_duration": "5 minutes" },
+        { "name": "Push-ups", "reps_or_duration": "4 sets to failure" },
+        { "name": "Bulgarian Split Squats", "reps_or_duration": "3 sets of 12 reps per leg" },
+        { "name": "Dips (using a chair or bench)", "reps_or_duration": "4 sets of 15 reps" },
+        { "name": "Lying Leg Raises", "reps_or_duration": "3 sets of 20 reps" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    },
+    {
+      "goal": "General Fitness",
+      "level": "Beginner",
+      "duration": "15-20",
+      "title": "Daily Movement Routine",
+      "description": "A balanced mix of cardio and strength to improve overall health and energy levels.",
+      "plan": [
+        { "name": "Warm-up: Marching & Torso Twists", "reps_or_duration": "3 minutes" },
+        { "name": "Jumping Jacks", "reps_or_duration": "2 sets of 30 seconds" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "2 sets of 15 reps" },
+        { "name": "Push-ups (on knees)", "reps_or_duration": "2 sets of 8 reps" },
+        { "name": "Plank", "reps_or_duration": "2 sets, hold for 30 seconds" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "3 minutes" }
+      ]
+    },
+    {
+      "goal": "General Fitness",
+      "level": "Beginner",
+      "duration": "30-40",
+      "title": "Extended Wellness Routine",
+      "description": "A longer, balanced routine for beginners to improve both cardiovascular health and basic strength.",
+      "plan": [
+        { "name": "Warm-up: Light Cardio & Joint Rotations", "reps_or_duration": "5 minutes" },
+        { "name": "Jumping Jacks", "reps_or_duration": "3 sets of 40 seconds" },
+        { "name": "Bodyweight Squats", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Glute Bridges", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Bird-Dog", "reps_or_duration": "3 sets of 10 reps per side" },
+        { "name": "Plank", "reps_or_duration": "3 sets, hold for 30-45 seconds" },
+        { "name": "Cool-down: Full Body Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    },
+    {
+      "goal": "General Fitness",
+      "level": "Intermediate",
+      "duration": "15-20",
+      "title": "Quick Total Body Tune-up",
+      "description": "A fast-paced workout to activate all your major muscle groups and boost your energy for the day.",
+      "plan": [
+        { "name": "Warm-up: Dynamic Stretches", "reps_or_duration": "2 minutes" },
+        { "name": "Inchworms", "reps_or_duration": "2 sets of 10 reps" },
+        { "name": "Plank to Downward Dog", "reps_or_duration": "2 sets of 12 reps" },
+        { "name": "Jump Squats", "reps_or_duration": "3 sets of 15 reps" },
+        { "name": "Cool-down: Stretching", "reps_or_duration": "3 minutes" }
+      ]
+    },
+    {
+      "goal": "General Fitness",
+      "level": "Intermediate",
+      "duration": "30-40",
+      "title": "Active Lifestyle Booster",
+      "description": "A comprehensive routine to enhance cardiovascular health and functional strength.",
+      "plan": [
+        { "name": "Warm-up: Jogging & Dynamic Stretches", "reps_or_duration": "5 minutes" },
+        { "name": "Burpees", "reps_or_duration": "3 sets of 10 reps" },
+        { "name": "Alternating Lunges", "reps_or_duration": "3 sets of 20 reps (10 each leg)" },
+        { "name": "Push-ups", "reps_or_duration": "3 sets to failure" },
+        { "name": "Russian Twists (bodyweight)", "reps_or_duration": "3 sets of 30 reps" },
+        { "name": "Cool-down: Deep Stretching", "reps_or_duration": "5 minutes" }
+      ]
+    }
+  ]
+}
+
