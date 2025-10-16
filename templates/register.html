@@ -44,7 +44,8 @@
             <input type="password" class="form-control" id="confirm_password" name="confirm_password" required autocomplete="new-password">
           </div>
 
-          <div id="passwordError" class="text-danger mb-3"></div>
+          <!-- This div will now show all password-related errors -->
+          <div id="passwordError" class="text-danger mb-3" style="font-size: 0.9em;"></div>
 
           <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" id="showPassword">
@@ -63,36 +64,62 @@
   </div>
 </div>
 
+<!-- MODIFIED: JavaScript with enhanced validation -->
 <script>
-  // Elements for showing/hiding password
+document.addEventListener('DOMContentLoaded', function () {
   const showPasswordCheckbox = document.getElementById('showPassword');
   const passwordField = document.getElementById('password');
   const confirmPasswordField = document.getElementById('confirm_password');
+  const registerForm = document.getElementById('registerForm');
+  const passwordError = document.getElementById('passwordError');
 
+  // Logic for showing/hiding password (unchanged)
   showPasswordCheckbox.addEventListener('change', function() {
     const type = this.checked ? 'text' : 'password';
     passwordField.setAttribute('type', type);
     confirmPasswordField.setAttribute('type', type);
   });
 
-  // Get the form and the error message container
-  const registerForm = document.getElementById('registerForm');
-  const passwordError = document.getElementById('passwordError');
-
-  // Listen for the form's submit event
+  // --- START OF NEW VALIDATION LOGIC ---
   registerForm.addEventListener('submit', function(event) {
-    // Check if the password and confirm password fields do NOT match
-    if (passwordField.value !== confirmPasswordField.value) {
-      // 1. Prevent the form from submitting
-      event.preventDefault();
-      
-      // 2. Display an error message
-      passwordError.textContent = 'Passwords do not match. Please try again.';
-    } else {
-      // If they do match, ensure the error message is cleared
-      passwordError.textContent = '';
+    const password = passwordField.value;
+    const confirmPassword = confirmPasswordField.value;
+    
+    // Clear any previous error messages
+    passwordError.textContent = '';
+
+    // 1. Check for password match
+    if (password !== confirmPassword) {
+      event.preventDefault(); // Stop form submission
+      passwordError.textContent = 'Passwords do not match.';
+      return; // Stop further checks
     }
+
+    // 2. Check for minimum length
+    if (password.length < 5) {
+      event.preventDefault();
+      passwordError.textContent = 'Password must be at least 5 characters long.';
+      return;
+    }
+
+    // 3. Check for at least one number
+    if (!/\d/.test(password)) {
+      event.preventDefault();
+      passwordError.textContent = 'Password must contain at least one number.';
+      return;
+    }
+
+    // 4. Check for at least one special character
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      event.preventDefault();
+      passwordError.textContent = 'Password must contain at least one special character.';
+      return;
+    }
+    
+    // If all checks pass, the form will submit normally.
   });
+  // --- END OF NEW VALIDATION LOGIC ---
+});
 </script>
 
 {% endblock %}
