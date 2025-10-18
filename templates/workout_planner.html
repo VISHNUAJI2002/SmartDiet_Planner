@@ -9,7 +9,6 @@
                 Tell us your goals and available time to generate a personalized workout routine.
             </p>
 
-            <!-- Workout Selection Form -->
             <form id="workout-form">
                 <div class="row g-3">
                     <div class="col-md-4">
@@ -42,17 +41,14 @@
         </div>
     </div>
 
-    <!-- Workout Result Container -->
     <div id="workout-result-container" class="mt-4" style="display: none;">
         <div class="card shadow-sm p-4 mx-auto" style="max-width: 800px; border: none; border-radius: 12px;">
             <div class="card-body" id="workout-result-content">
-                <!-- Loading spinner and results will be injected here -->
-            </div>
+                </div>
         </div>
     </div>
 </div>
 
-<!-- JavaScript to handle form submission and all actions -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('workout-form');
@@ -104,8 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.share({ title: 'My Helio Workout Plan', text: getShareableWorkoutText() }).catch(console.error);
         }
     }
-    // --- END OF NEW HELPER FUNCTIONS ---
-
+    
+    // NEW WHATSAPP SHARE FUNCTION for workout_planner.html
+    function shareWorkoutPlanOnWhatsApp() {
+        const text = encodeURIComponent(getShareableWorkoutText());
+        window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+    // END NEW WHATSAPP SHARE FUNCTION
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     workout.plan.forEach(exercise => {
                         exercisesHtml += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>${exercise.name}</span><span class="badge bg-primary rounded-pill">${exercise.reps_or_duration}</span></li>`;
                     });
-                    // MODIFIED: Added action buttons and wrapper div
+                    
                     resultContent.innerHTML = `
                         <div id="workout-plan-content">
                             <h3 class="text-info">${workout.title}</h3>
@@ -140,11 +141,12 @@ document.addEventListener('DOMContentLoaded', function() {
                            <button id="save-workout-btn" class="btn btn-sm btn-outline-primary"><i class="bi bi-bookmark"></i> Save Workout</button>
                            <button id="print-workout-btn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print/Download</button>
                            <div class="btn-group">
-                              <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                             <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-share"></i> Share
                               </button>
                               <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#" id="copy-workout-btn"><i class="bi bi-clipboard"></i> Copy to Clipboard</a></li>
+                                <li><a class="dropdown-item" href="#" id="whatsapp-share-workout-btn"><i class="bi bi-whatsapp"></i> Share on WhatsApp</a></li> {# NEW WHATSAPP SHARE BUTTON #}
                                 <li class="${nativeShareSupported}"><a class="dropdown-item" href="#" id="native-share-workout-btn"><i class="bi bi-three-dots"></i> More Options...</a></li>
                               </ul>
                             </div>
@@ -161,10 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     resultContent.addEventListener('click', function(event) {
         const saveButton = event.target.closest('#save-workout-btn');
-        // MODIFIED: Added listeners for new buttons
         const printButton = event.target.closest('#print-workout-btn');
         const copyButton = event.target.closest('#copy-workout-btn');
         const nativeShareButton = event.target.closest('#native-share-workout-btn');
+        const whatsappShareButton = event.target.closest('#whatsapp-share-workout-btn'); // NEW: WhatsApp button for workout
 
         if (saveButton) {
             const title = resultContent.querySelector('h3').innerText;
@@ -196,7 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // MODIFIED: Added event handlers
         if (printButton) {
             printWorkoutPlan();
         }
@@ -208,9 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             nativeShareWorkoutPlan();
         }
+        if (whatsappShareButton) { // NEW: WhatsApp handler for workout
+            event.preventDefault();
+            shareWorkoutPlanOnWhatsApp();
+        }
     });
 });
 </script>
 
 {% endblock %}
-
