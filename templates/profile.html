@@ -42,8 +42,14 @@
         <div class="d-flex gap-3 mt-4">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
                 Update Profile
-            </button>
+            </button>     
+            <form action="{{url_for('dashboard')}}">
+            <button class="btn btn-primary">
+                Dashboard
+            </button> 
+            </form>      
         </div>
+        
 
         {% else %}
         <h3 class="mb-3 text-primary text-start">Complete Your Profile</h3>

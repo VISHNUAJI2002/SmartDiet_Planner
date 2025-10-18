@@ -8,9 +8,7 @@
     </div>
 
     <div class="row">
-        <!-- MODIFIED: Column for BMI and the new Daily Tip card -->
         <div class="col-lg-5 mb-4">
-            <!-- BMI GAUGE CARD -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body text-center">
                     <h4 class="card-title text-success mb-3">Your BMI Status</h4>
@@ -27,7 +25,6 @@
                 </div>
             </div>
             
-            <!-- NEW: Daily Health Tip Card -->
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h4 class="card-title text-primary"><i class="bi bi-lightbulb"></i> Tip of the Day</h4>
@@ -38,14 +35,13 @@
             </div>
         </div>
 
-        <!-- Column for Diet/Workout Actions -->
         <div class="col-lg-7 mb-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h4 class="card-title">Quick Actions</h4>
                     <p class="card-text">Update your details or get a new meal plan or workout recommendation.</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url_for('profile') }}" class="btn btn-secondary"><i class="bi bi-person-fill"></i> Update Profile</a>
+                        <a href="{{ url_for('profile') }}" class="btn btn-secondary"><i class="bi bi-person-fill"></i>Profile</a>
                         <button id="predict-btn" class="btn btn-success"><i class="bi bi-magic"></i> Predict Meal Plan</button>
                         <a href="{{ url_for('workout_planner') }}" class="btn btn-info text-white"><i class="bi bi-activity"></i> Set Up Workout</a>
                     </div>
@@ -64,7 +60,6 @@
     </div>
 </div>
 
-<!-- All JavaScript -->
 {% if profile and profile.bmi %}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script type="text/javascript">
@@ -133,6 +128,13 @@
             }
         }
         
+        // --- NEW WHATSAPP SHARE FUNCTION ---
+        function shareDietPlanOnWhatsApp() {
+            const text = encodeURIComponent(getShareableText());
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+        // --- END NEW WHATSAPP SHARE FUNCTION ---
+
         function saveDietPlan(buttonElement) {
             const mealPlanName = document.getElementById('meal-plan-name-hidden').value;
             const breakfast = document.getElementById('breakfast-item').innerText;
@@ -170,13 +172,18 @@
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    const mapUrl = `https://www.google.com/maps/search/grocery+store+near+me/@${lat},${lon},15z`;
+                    const mapUrl = `http://google.com/maps?q=grocery+stores+near+me&ll=${lat},${lon}&z=15`;
                     window.open(mapUrl, '_blank');
+                }, function(error) {
+                    // Handle geolocation errors
+                    console.error('Geolocation error:', error);
+                    alert('Could not retrieve your location. Please ensure location services are enabled and try again.');
                 });
             } else {
                 alert('Geolocation is not supported by your browser.');
             }
         }
+
 
         function orderOnBlinkit(mealText) {
             const stopwords = ['with', 'and', 'or', 'a', 'the', 'of', 'in', 'on', 'grilled', 'baked', 'sautéed', 'roasted', 'steamed', 'fried', 'pan-seared', 'mashed', 'seeds', 'cheese', 'oil', 'bread', 'soup', 'salad', 'bowl', 'wraps'];
@@ -277,14 +284,15 @@
                             <hr>
                             <div class="d-flex justify-content-start align-items-center gap-2 mt-3 flex-wrap">
                                 <button id="save-plan-btn" class="btn btn-sm btn-outline-primary"><i class="bi bi-bookmark"></i> Save Plan</button>
-                                <button id="print-plan-btn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print</button>
+                                <button id="print-plan-btn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i> Print/Download</button>
                                 <button id="find-grocery-btn" class="btn btn-sm btn-outline-info"><i class="bi bi-geo-alt"></i> Find Stores</button>
                                 <div class="btn-group">
-                                  <button type="button" class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i> Share</button>
-                                  <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" id="copy-plan-btn"><i class="bi bi-clipboard"></i> Copy to Clipboard</a></li>
-                                    <li class="${nativeShareSupported}"><a class="dropdown-item" href="#" id="native-share-btn"><i class="bi bi-three-dots"></i> More Options...</a></li>
-                                  </ul>
+                                    <button type="button" class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i> Share</button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" id="copy-plan-btn"><i class="bi bi-clipboard"></i> Copy to Clipboard</a></li>
+                                        <li><a class="dropdown-item" href="#" id="whatsapp-share-btn"><i class="bi bi-whatsapp"></i> Share on WhatsApp</a></li> {# NEW WHATSAPP SHARE BUTTON #}
+                                        <li class="${nativeShareSupported}"><a class="dropdown-item" href="#" id="native-share-btn"><i class="bi bi-three-dots"></i> More Options...</a></li>
+                                    </ul>
                                 </div>
                             </div>
                             <p class="text-muted mt-3 mb-0 fst-italic" style="font-size: 0.9em;">Tap 'Predict Meal Plan' again for another diet.</p>`;
@@ -304,6 +312,7 @@
             const printBtn = event.target.closest('#print-plan-btn');
             const copyBtn = event.target.closest('#copy-plan-btn');
             const nativeShareBtn = event.target.closest('#native-share-btn');
+            const whatsappShareBtn = event.target.closest('#whatsapp-share-btn'); // NEW: WhatsApp button
             const saveBtn = event.target.closest('#save-plan-btn');
             const findGroceryBtn = event.target.closest('#find-grocery-btn');
             const blinkitItemBtn = event.target.closest('.blinkit-item-btn');
@@ -313,6 +322,7 @@
             if (printBtn) printDietPlan();
             if (copyBtn) { event.preventDefault(); copyDietPlan(copyBtn); }
             if (nativeShareBtn) { event.preventDefault(); nativeShareDietPlan(); }
+            if (whatsappShareBtn) { event.preventDefault(); shareDietPlanOnWhatsApp(); } // NEW: WhatsApp handler
             if (saveBtn) saveDietPlan(saveBtn);
             if (findGroceryBtn) findGroceryStore();
 
@@ -356,4 +366,3 @@
 </script>
 
 {% endblock %}
-

@@ -11,6 +11,7 @@ import tensorflow as tf
 import random
 from datetime import datetime
 import json
+import re # ADDED: For more complex validation using regular expressions
 
 load_dotenv()
 
@@ -44,7 +45,6 @@ def load_workout_plans():
         print(f"ERROR loading workout plans: {e}")
         return []
 
-# NEW: Function to load health tips
 def load_health_tips():
     try:
         with open('data/health_tips.json', 'r') as f:
@@ -56,7 +56,7 @@ def load_health_tips():
 
 DIET_PLANS_DATA = load_diet_plans()
 WORKOUT_PLANS_DATA = load_workout_plans()
-HEALTH_TIPS_DATA = load_health_tips() # NEW
+HEALTH_TIPS_DATA = load_health_tips()
 
 
 login_manager = LoginManager(app)
@@ -86,9 +86,23 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        
+        # --- START OF MODIFIED CODE: Enhanced Password Validation ---
+        if len(password) < 5:
+            flash("Password must be at least 5 characters long.", "danger")
+            return redirect(url_for("register"))
+        if not re.search(r"\d", password):
+            flash("Password must contain at least one number.", "danger")
+            return redirect(url_for("register"))
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            flash("Password must contain at least one special character.", "danger")
+            return redirect(url_for("register"))
+        # --- END OF MODIFIED CODE ---
+
         if mongo.db.users.find_one({"username": username}):
             flash("Username already exists!", "danger")
             return redirect(url_for("register"))
+            
         hashed_pw = generate_password_hash(password)
         mongo.db.users.insert_one({"username": username, "password": hashed_pw})
         flash("Registration successful! Please login.", "success")
@@ -291,7 +305,6 @@ def delete_workout(workout_id):
         return jsonify({"success": False, "message": "Workout not found or permission denied."}), 404
 
 
-# --- START OF NEW CODE: Daily Health Tip ---
 @app.route("/get-daily-tip")
 @login_required
 def get_daily_tip():
@@ -301,7 +314,6 @@ def get_daily_tip():
     
     tip = random.choice(HEALTH_TIPS_DATA)
     return jsonify({"success": True, "tip": tip})
-# --- END OF NEW CODE ---
 
 
 @app.route("/logout")
